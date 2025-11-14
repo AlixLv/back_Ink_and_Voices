@@ -17,6 +17,7 @@
   "homepage": "https://github.com/AlixLv/back_Ink_and_Voices#readme",
   "description": "",
   "dependencies": {
-    "fastify": "^5.6.2"
+    "fastify": "^5.6.2",
+    "typescript": "^5.9.3"
   }
 }

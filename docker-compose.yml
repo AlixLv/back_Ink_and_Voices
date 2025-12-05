@@ -1,17 +1,21 @@
-version: "3.9"
+#version: "3.9" considéré comme obsolète d'après le terminal
 
 services:
   dev:
     build:
       context: .
-    command: npm start -- --host 0.0.0.0 --port 8000
+      dockerfile: Dockerfile
     ports:
       - "8000:8000"
     environment:
       - NODE_ENV=development
-    volumes:
+      - ADDRESS=0.0.0.0
+      - PORT=8000
+    volumes: # on mappe le dossier local à gauche sur le dossier distant dans le volume du container à droite
       - .:/app
       - /app/node_modules
+      - /app/build # évite d'écraser le build du container
+    command: npm run dev  
 
   prod:
     build:

@@ -6,7 +6,7 @@ COPY . .
 # on complie TypeScript
 RUN npm run build
 RUN addgroup -S app && adduser -S app -G app && chown -R app:app /app
-EXPOSE 8000
+EXPOSE 8032
 USER app
 # on lance directement le JS compilé
 CMD ["node", "build/index.js"]

@@ -10,7 +10,7 @@ services:
     environment:
       - NODE_ENV=development
       - ADDRESS=0.0.0.0
-      - PORT=8000
+      - PORT=8032
     volumes: # on mappe le dossier local à gauche sur le dossier distant dans le volume du container à droite
       - .:/app
       - /app/node_modules
@@ -21,6 +21,6 @@ services:
     build:
       context: .
     ports:
-      - "8000:8000"
+      - "8032:8032"
     environment:
       - NODE_ENV=production

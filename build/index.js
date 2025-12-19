@@ -1,14 +1,9 @@
-import 'dotenv/config';
 import Fastify from 'fastify';
-import { createClient } from '@supabase/supabase-js';
+//import supabase from "./../config/supabase.config.js";
+import { supabaseUrl } from "./config/supabase.config.js";
+//import supabase from 'C:/Users/Térence/Desktop/RNCP6-CODE/back_Ink_and_Voices/config/supabase.config'
 const fastify = Fastify();
 const { ADDRESS = '0.0.0.0', PORT = '8000' } = process.env;
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_KEY;
-if (!supabaseUrl || !supabaseKey) {
-    throw new Error('SUPABASE_URL and SUPABASE_KEY must be defined');
-}
-const supabase = createClient(supabaseUrl, supabaseKey);
 fastify.get('/', async (request, reply) => {
     return { message: 'Hello world!' };
 });
@@ -20,5 +15,4 @@ fastify.listen({ host: ADDRESS, port: parseInt(PORT, 10) }, (err, address) => {
     console.log(`Server listening at ${address}`);
     console.log(supabaseUrl);
 });
-export default supabase;
 //# sourceMappingURL=index.js.map

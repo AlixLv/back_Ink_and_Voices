@@ -7,8 +7,9 @@
 
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
-    "module": "nodenext",
-    "target": "esnext",
+    "module": "esnext", //valeur modifiée pour setup Prisma
+    "target": "es2023", //valeur modifiée pour setup Prisma
+    "moduleResolution": "node", //valeur modifiée pour setup Prisma
     // "types": [],
     // For nodejs:
     // "lib": ["esnext"],
@@ -40,7 +41,7 @@
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
-    "esModuleInterop": true // Permet l'utilisation de import avec des modules CommonJS
+    "esModuleInterop": true, // Permet l'utilisation de import avec des modules CommonJS
   },
     "include": ["src/**/*"], // Compile tous les fichiers dans src/     
     "exclude": ["node_modules", "build"] // Ignore node_modules et build

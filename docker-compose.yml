@@ -5,11 +5,15 @@ services:
     container_name: postgres
     image: postgres:16-alpine
     environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PW}
-      - POSTGRES_DB=${POSTGRES_DB} #optional (specify default database instead of $POSTGRES_DB)
+    - POSTGRES_USER=postgres
+    - POSTGRES_PASSWORD=postgres
+    - POSTGRES_DB=ink_and_voices
+    - NODE_ENV=development
+    - ADDRESS=0.0.0.0
+    - PORT=8032
+    - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/ink_and_voices?schema=public #optional (specify default database instead of $POSTGRES_DB)
     ports:
-      - "5432:5432"
+      - "5433:5432"
     restart: always
 
   pgadmin:
@@ -32,11 +36,15 @@ services:
       - NODE_ENV=development
       - ADDRESS=0.0.0.0
       - PORT=8032
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/ink_and_voices?schema=public
+      - LOCAL_DATABASE_URL=postgresql://postgres:postgres@postgres:5432/ink_and_voices?schema=public
     volumes: # on mappe le dossier local à gauche sur le dossier distant dans le volume du container à droite
       - .:/app
       - /app/node_modules
       - /app/build # évite d'écraser le build du container
     command: npm start
+    depends_on:
+      - postgres
     #command: npm run dev  
 
   prod:

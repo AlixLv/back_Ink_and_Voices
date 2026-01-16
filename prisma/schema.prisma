@@ -9,12 +9,12 @@ datasource db {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 // Model créé comme test depuis l'interface Supabase, à supprimer dans inti migration
-model Type {
-  id          Int      @id @default(autoincrement()) @db.SmallInt
-  nom_du_type String?  @db.VarChar
-  image_url   String?
-  created_at  DateTime @default(now()) @db.Timestamptz(6)
-}
+// model Type {
+//   id          Int      @id @default(autoincrement()) @db.SmallInt
+//   nom_du_type String?  @db.VarChar
+//   image_url   String?
+//   created_at  DateTime @default(now()) @db.Timestamptz(6)
+// }
 
 model user {
   id String @id @default(uuid())

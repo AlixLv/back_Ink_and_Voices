@@ -1,7 +1,7 @@
 import Fastify from 'fastify';
+import { supabaseUrl } from "./config/supabase.config.js";
 
 const fastify = Fastify();
-
 const { ADDRESS = '0.0.0.0', PORT = '8000' } = process.env;
 
 fastify.get('/', async (request, reply) => {
@@ -10,8 +10,10 @@ fastify.get('/', async (request, reply) => {
 
 fastify.listen({ host: ADDRESS, port: parseInt(PORT, 10) }, (err, address) => {
   if (err) {
-    console.error(err);
+    console.error("🚨 ",err);
     process.exit(1);
   }
   console.log(`Server listening at ${address}`);
+  console.log(supabaseUrl);
 });
+

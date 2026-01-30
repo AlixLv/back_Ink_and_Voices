@@ -1,34 +1,32 @@
-# Ink & Voices
-
+# ✨ Ink & Voices
 A collaborative database platform dedicated to promoting and cataloging works by women authors and authors from gender minorities.
-
 You are in the backend repository. For the frontend repository, have a look [here](https://github.com/AlixLv/front_Ink_and_Voices)
 
-## 📖 About the Project
-
+## About the Project
 This project was born from the realisation there was a significant lack of representation of women and gender minority authors in the most commonly used databases. Then, we created an inclusive, community-driven database that addresses this gap and makes diverse literature more discoverable for everyone.
 This app provides developers and readers an easy access to a comprehensive database of underrepresented authors. By making this data available via API, we aim to help others who face the same challenges we encountered in finding diverse literary resources. Readers will also be able to look through our database thanks to our website.
 
-### ✨ Key Features
-
+### Key Features
 - **Collaborative Contributions**: Community members can propose books to add to the database
 - **Moderation System**: Administrators review and validate or reject submissions to ensure quality and accuracy
 - **Public API**: Developers can access the database through our API to integrate diverse author data into their own projects
 - **Focus on Representation**: Dedicated to highlighting women authors and authors from gender minorities
+***
 
 ## Getting Started
+
 ### Dependencies
 - Docker
 
 ### Installing
-  
-- git clone the repository : <https://github.com/AlixLv/front_Ink_and_Voices>  
+- `git clone` the repository : <https://github.com/AlixLv/front_Ink_and_Voices>  
 - Run Docker Desktop (Windows, Linux) or ... (Mac)  
-"build the project from the docker-compose"  
+- build the project from the docker-compose with
 `docker-compose up --build -d`  
 
 The Fastify server should be running.  
 
+#### Useful commands
 kill the container:  
 `docker-compose down`  
 
@@ -41,12 +39,9 @@ stop the container:
 enter the container:  
 `docker exec -ti back_dev_ink_and_voices_dev-1 sh`  
 
-***
 
 #### Modify the database  
 The database shouldn't be modified. Anyways, if you consider some datas should be added, contact us by [mail](inkandvoices264@gmail.com)  
-
-***
 
 #### PgAdmin Connection
 todo
@@ -54,11 +49,13 @@ todo
 ### Running tests
 todo
 
+***
 ## Architecture and patterns
 ### Security
 todo
 
-## 🛠️ Tech Stack
+***
+## Tech Stack
 
 ### Frontend
 - React
@@ -72,8 +69,8 @@ todo
 - PostgreSQL
 - Prisma
 
-
-## 📚 Usage Specificities
+***
+## Usage Specificities
 
 ### For Contributors
 1. Browse the existing database
@@ -100,11 +97,11 @@ We welcome contributions from the community! Whether you're adding books, improv
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## 📝 License
+## License
 
 //TBD
 
-## 👥 Team
+## Team
 
 This project is being developed as part of our RNCP6 certification.
 

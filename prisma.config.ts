@@ -22,4 +22,9 @@ export default defineConfig({
   datasource: {
     url: databaseURL,
   },
+<<<<<<< HEAD:src/prisma.config.ts
 });
+=======
+});
+console.log("🌼", process.env["DATABASE_URL"]);
+>>>>>>> 42d28a8 (chore: fixed node types problem in prisma and ts config):prisma.config.ts

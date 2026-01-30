@@ -11,7 +11,10 @@ This app provides developers and readers an easy access to a comprehensive datab
 - **Moderation System**: Administrators review and validate or reject submissions to ensure quality and accuracy
 - **Public API**: Developers can access the database through our API to integrate diverse author data into their own projects
 - **Focus on Representation**: Dedicated to highlighting women authors and authors from gender minorities
-***
+  
+    
+
+    
 
 ## Getting Started
 
@@ -49,12 +52,17 @@ todo
 ### Running tests
 todo
 
-***
+  
+    
+    
+
 ## Architecture and patterns
 ### Security
 todo
 
-***
+  
+    
+
 ## Tech Stack
 
 ### Frontend
@@ -69,7 +77,8 @@ todo
 - PostgreSQL
 - Prisma
 
-***
+  
+    
 ## Usage Specificities
 
 ### For Contributors

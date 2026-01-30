@@ -1,6 +1,31 @@
 #version: "3.9" considéré comme obsolète d'après le terminal
 
 services:
+  postgres:
+    container_name: postgres
+    image: postgres:16-alpine
+    environment:
+    - POSTGRES_USER=${POSTGRES_USER}
+    - POSTGRES_PASSWORD=${POSTGRES_PW}
+    - POSTGRES_DB=${POSTGRES_DB}
+    - NODE_ENV=development
+    - ADDRESS=0.0.0.0
+    - PORT=8032
+    - DATABASE_URL=${LOCAL_DATABASE_URL} #optional (specify default database instead of $POSTGRES_DB)
+    ports:
+      - "5432:5432"
+    restart: always
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4:9.11.0
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_MAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PW}
+    ports:
+      - "5050:80"
+    restart: always
+
   dev:
     build:
       context: .
@@ -11,11 +36,15 @@ services:
       - NODE_ENV=development
       - ADDRESS=0.0.0.0
       - PORT=8032
+      - DATABASE_URL=${DATABASE_URL}
+      - LOCAL_DATABASE_URL=${LOCAL_DATABASE_URL}
     volumes: # on mappe le dossier local à gauche sur le dossier distant dans le volume du container à droite
       - .:/app
       - /app/node_modules
       - /app/build # évite d'écraser le build du container
     command: npm start
+    depends_on:
+      - postgres
     #command: npm run dev  
 
   prod:

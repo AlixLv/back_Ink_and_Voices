@@ -8,9 +8,101 @@ datasource db {
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model Type {
-  id          Int      @id @default(autoincrement()) @db.SmallInt
-  nom_du_type String?  @db.VarChar
-  image_url   String?
-  created_at  DateTime @default(now()) @db.Timestamptz(6)
+// Model créé comme test depuis l'interface Supabase, à supprimer dans inti migration
+// model Type {
+//   id          Int      @id @default(autoincrement()) @db.SmallInt
+//   nom_du_type String?  @db.VarChar
+//   image_url   String?
+//   created_at  DateTime @default(now()) @db.Timestamptz(6)
+// }
+
+model user {
+  id String @id @default(uuid())
+  email String @unique
+  username String
+  password String
+  role role @default(user)
+  book_suggestions book[] //attribut pas présent dans nos MCD et MLD. A ajouter si on fonctionne comme cela. 
+  created_at DateTime @default(now()) //a modifier dans MLD
+  updated_at DateTime @updatedAt 
+  validations book_validation[] // attribut à ajouter dans MCD et MLD
+  //session Session? 
 }
+
+enum role {
+  user
+  admin
+}
+
+model book {
+  id Int @id @default(autoincrement())
+  type_id Int
+  type type @relation(fields: [type_id], references: [id])
+  title String
+  author String
+  publishing_house String
+  publication_year String?
+  themes theme_book[]
+  resume String? @db.Text 
+  reference_link String?
+  short_description String @db.Text
+  status status @default(pending)
+  user_id String @unique
+  user user @relation(fields: [user_id], references:[id])
+  created_at DateTime @default(now())
+  validations book_validation[]
+}
+
+enum status {
+  validated
+  refused
+  pending
+}
+
+model type {
+  id Int @id @default(autoincrement())
+  type_name String 
+  url_image String?
+  books book[]
+  created_at  DateTime @default(now())
+}
+model theme {
+  id Int @id @default(autoincrement())
+  theme_name String
+  books theme_book[]
+  created_at DateTime @default(now())
+}
+model theme_book {
+  book_id Int
+  book book @relation(fields: [book_id], references: [id])
+
+  theme_id Int
+  theme theme @relation(fields: [theme_id], references: [id])
+
+  created_at DateTime @default(now())
+  
+  @@id([book_id, theme_id])
+}
+
+model book_validation {
+  id Int @id @default(autoincrement())
+  book_id Int
+  book book @relation(fields: [book_id], references: [id])
+  admin_id String
+  admin user @relation(fields: [admin_id], references: [id])
+  validation_date DateTime @default(now())
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now()) //si un livre est validé, puis refusé, le référencer dans la db et mettre en place une purge des données régulière ?
+  status status
+  comment String? @db.Text
+}
+
+
+// model non existant dans le MCD et MLD
+// model Session {
+//   id String @id @default(uuid())
+//   sessionToken String @unique
+//   contributeuriceId String @unique
+//   contributeurice Contributeurice @relation(fields: [contributeuriceId], references:[id])
+//   expire DateTime
+// }

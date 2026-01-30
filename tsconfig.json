@@ -44,5 +44,5 @@
     "esModuleInterop": true, // Permet l'utilisation de import avec des modules CommonJS
   },
     "include": ["src/**/*"], // Compile tous les fichiers dans src/     
-    "exclude": ["node_modules", "build"] // Ignore node_modules et build
+    "exclude": ["node_modules", "build", "prisma.config.ts"] // Ignore node_modules, build et la config Prisma
 }

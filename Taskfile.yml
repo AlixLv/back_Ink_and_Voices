@@ -2,18 +2,9 @@
 
 version: '3'
 
-vars:
-  GREETING: Hello, world!
-
 tasks:
-  default:
-    desc: Print a greeting message
-    cmds:
-      - echo "{{.GREETING}}"
-    silent: true
-  
   dev-db:
-    desc: Starts docker and dev local database
+    desc: Starts local database for dev
     cmds: 
       - docker exec back_ink_and_voices-dev-1 sh -c "npx prisma migrate dev"
-      # Ajouter le seeding
+      #TODO: Ajouter le seeding

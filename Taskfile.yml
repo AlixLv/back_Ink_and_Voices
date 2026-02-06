@@ -1,0 +1,19 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+
+version: '3'
+
+vars:
+  GREETING: Hello, world!
+
+tasks:
+  default:
+    desc: Print a greeting message
+    cmds:
+      - echo "{{.GREETING}}"
+    silent: true
+  
+  dev-db:
+    desc: Starts docker and dev local database
+    cmds: 
+      - docker exec back_ink_and_voices-dev-1 sh -c "npx prisma migrate dev"
+      # Ajouter le seeding

@@ -21,6 +21,7 @@
   "homepage": "https://github.com/AlixLv/back_Ink_and_Voices#readme",
   "description": "",
   "dependencies": {
+    "@go-task/cli": "^3.48.0",
     "@prisma/adapter-pg": "^7.2.0",
     "@prisma/client": "^7.2.0",
     "@supabase/supabase-js": "^2.89.0",

@@ -1,0 +1,10 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+
+version: '3'
+
+tasks:
+  dev-db:
+    desc: Starts local database for dev
+    cmds: 
+      - docker exec back_ink_and_voices-dev-1 sh -c "npx prisma migrate dev"
+      #TODO: Ajouter le seeding

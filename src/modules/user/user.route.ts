@@ -1,6 +1,9 @@
 import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
-import { serializerCompiler, validatorCompiler, type ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
+import {type ZodTypeProvider } from 'fastify-type-provider-zod';
+import { serializerCompiler, validatorCompiler}  from 'fastify-type-provider-zod';
+import { $ref } from './user.schema';
+
 
 export async function userRoutes(app: FastifyInstance) {
   // Utilisation de withTypeProvider pour avoir les types automatiques
@@ -16,11 +19,10 @@ export async function userRoutes(app: FastifyInstance) {
 
   app.withTypeProvider<ZodTypeProvider>().post('/register', {
     schema: {
-      body: z.object({
-        email: z.email(),
-        password: z.string().min(8),
-        username: z.string()
-      })
+      body: $ref('createUserSchema'),
+      response: {
+        201: $ref('createUserResponseSchema'),
+      }
     }
   }, async(req, reply) => {
     const {email, password, username} = req.body

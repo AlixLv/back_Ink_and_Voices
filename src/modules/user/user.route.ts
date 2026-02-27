@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify'
 import { z } from 'zod';
 import {type ZodTypeProvider } from 'fastify-type-provider-zod';
 import { createUserSchema, createUserResponseSchema } from './user.schema.js';
+import { registerUserHandler } from './user.controller.js';
 
 
 export async function userRoutes(app: FastifyInstance) {
@@ -25,16 +26,7 @@ export async function userRoutes(app: FastifyInstance) {
         201: createUserResponseSchema,
       }
     }
-  }, async(req, reply) => {
-    const {email, password, username} = req.body
-    app.log.info(`Nouvel utilisateur créé: ${email}, ${username}`)
-    const newUser = {
-      email: email,
-      username: username
-    }
-    reply.code(201)
-    return newUser
-  })
+  }, registerUserHandler)
 
   server.post('/login', () => {})
 

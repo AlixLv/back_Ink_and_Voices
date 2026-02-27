@@ -1,9 +1,11 @@
 import Fastify from 'fastify';
+import { PrismaClient } from '@prisma/client';
 import { userRoutes } from './modules/user/user.route.js';
 import { serializerCompiler, validatorCompiler, type ZodTypeProvider } from 'fastify-type-provider-zod';
 
 const app = Fastify({logger: true}).withTypeProvider<ZodTypeProvider>();
 const { ADDRESS = '0.0.0.0', PORT = '8000' } = process.env;
+const prisma = new PrismaClient({});
 
   // sorte de portier qui va vérifier que les données envoyées dans la req correspondent bien au schéma Zod déclaré
   // si les données sont valides, il laisse passer la req et remplit res.body avec les données typées
@@ -15,6 +17,8 @@ const { ADDRESS = '0.0.0.0', PORT = '8000' } = process.env;
   // Si notre objet contient des data pas présentent dans le schéma, il ne les envoie pas au client
   app.setSerializerCompiler(serializerCompiler)
 
+  
+  app.decorate('prisma', prisma);
 
 // routes
 app.register(userRoutes, {prefix: 'api/users'})

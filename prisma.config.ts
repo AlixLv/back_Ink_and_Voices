@@ -23,4 +23,3 @@ export default defineConfig({
     url: databaseURL,
   },
 });
-console.log("🌼 the URL from prisma.config.ts is: ", process.env["DATABASE_URL"]);

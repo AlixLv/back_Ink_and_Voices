@@ -1,11 +1,10 @@
-import { FastifyReply, FastifyRequest } from 'fastify';
-import { ZodTypeProvider } from 'fastify-type-provider-zod';
-import type { CreateUserInput } from './user.schema';
+import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { CreateUserInput } from './user.schema.js';
 
 const SALT_ROUNDS = 10
 
 export async function registerUserHandler(
-    req: FastifyRequest<{Body: CreateUserInput}, any, any, ZodTypeProvider>, 
+    req: FastifyRequest<{Body: CreateUserInput}>,
     reply: FastifyReply
 ){
     const { email, username, password } = req.body;

@@ -1,11 +1,13 @@
 import Fastify from 'fastify';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from './generated/prisma/client.js';
+import { PrismaPg } from '@prisma/adapter-pg';
 import { userRoutes } from './modules/user/user.route.js';
 import { serializerCompiler, validatorCompiler, type ZodTypeProvider } from 'fastify-type-provider-zod';
 
 const app = Fastify({logger: true}).withTypeProvider<ZodTypeProvider>();
 const { ADDRESS = '0.0.0.0', PORT = '8000' } = process.env;
-const prisma = new PrismaClient({});
+const adapter = new PrismaPg({ connectionString: process.env['DATABASE_URL'] });
+const prisma = new PrismaClient({ adapter });
 
   // sorte de portier qui va vérifier que les données envoyées dans la req correspondent bien au schéma Zod déclaré
   // si les données sont valides, il laisse passer la req et remplit res.body avec les données typées

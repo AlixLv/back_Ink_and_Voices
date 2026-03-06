@@ -10,7 +10,6 @@ import { loginUserHandler } from './user.controller.js';
 
 
 export async function userRoutes(app: FastifyInstance) {
-  // Utilisation de withTypeProvider pour avoir les types automatiques
   const server = app.withTypeProvider<ZodTypeProvider>()
 
   server.get('/', {
@@ -32,7 +31,6 @@ export async function userRoutes(app: FastifyInstance) {
     }
   }, signUp)
 
-  //server.post('/login', () => {})
 
   server.post('/login', {
     schema: {

@@ -1,6 +1,7 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { CreateUserInput, LoginUserInput } from './user.schema.js';
 import * as argon2 from 'argon2';
+import { is } from 'zod/v4/locales';
 
 
 export async function signUp(
@@ -33,7 +34,7 @@ export async function signUp(
     }
 }
 
-
+// pour l'instant, on vérifie s'il y a un user avec cet email. Si c'est le cas, on revoie un message "user récupéré" avec email et pw de la requête
 export async function loginUserHandler(
     req: FastifyRequest<{Body: LoginUserInput}>,
     reply: FastifyReply
@@ -45,8 +46,17 @@ export async function loginUserHandler(
     },
     })
     if (!isUser) {
-        reply.send({ message : "ce user n'existe pas en db"})
+        return reply.code(404).send({ message : "ce user n'existe pas en db"});
     } else {
-        reply.send({ message : `utilisateur récupéré : ${email}, ${password}` })
+        try {
+            const hashPassword = isUser.password;
+            if (await argon2.verify(hashPassword, password)) {
+                return reply.code(200).send({ message : `utilisateur récupéré : ${email}, ${password}` });
+            } else {
+                return reply.code(404).send({message: "email ou mot de passe incorrect"})
+            }
+        } catch(e){
+            return reply.code(500).send(e);
+        }
     }
 }

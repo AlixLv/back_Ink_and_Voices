@@ -1,12 +1,12 @@
 import type { FastifyInstance } from 'fastify'
 import { z } from 'zod';
 import {type ZodTypeProvider } from 'fastify-type-provider-zod';
-import { createUserSchema, createUserResponseSchema } from './user.schema.js';
-<<<<<<< HEAD
+
 import { signUp } from './user.controller.js';
-=======
-import { registerUserHandler } from './user.controller.js';
->>>>>>> b2190da (feat: connexion finale à prismaClient en se basant sur le code d'alix pour register)
+
+import { createUserSchema, createUserResponseSchema, loginUserSchema, loginUserResponseSchema } from './user.schema.js';
+import { loginUserHandler } from './user.controller.js';
+
 
 
 export async function userRoutes(app: FastifyInstance) {
@@ -20,7 +20,7 @@ export async function userRoutes(app: FastifyInstance) {
       } 
     }
   } , async (req, reply) => {
-    reply.send({ message: '/ route hit success' })
+    reply.send({ message: '/ route hitttt success' })
   })
 
   server.post('/signup', {
@@ -32,7 +32,17 @@ export async function userRoutes(app: FastifyInstance) {
     }
   }, signUp)
 
-  server.post('/login', () => {})
+  //server.post('/login', () => {})
+
+  server.post('/login', {
+    schema: {
+      body: loginUserSchema,
+      reponse: {
+        200: loginUserResponseSchema,
+      }
+    }
+  }, loginUserHandler);
+
 
   server.delete('/logout', () => {})
 

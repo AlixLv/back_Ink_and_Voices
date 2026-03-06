@@ -1,5 +1,5 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import type { CreateUserInput } from './user.schema.js';
+import type { CreateUserInput, LoginUserInput } from './user.schema.js';
 import * as argon2 from 'argon2';
 
 
@@ -8,7 +8,6 @@ export async function signUp(
     reply: FastifyReply
 ){
     const { email, username, password } = req.body;
-
     const isUser = await req.server.prisma.user.findUnique({
         where: {
             email: email,
@@ -19,7 +18,6 @@ export async function signUp(
             message: 'A user already exists with this email.',
         })
     }
-
     try {
         const hashPassword = await argon2.hash(password);
         const user = await req.server.prisma.user.create({
@@ -35,3 +33,20 @@ export async function signUp(
     }
 }
 
+
+export async function loginUserHandler(
+    req: FastifyRequest<{Body: LoginUserInput}>,
+    reply: FastifyReply
+){
+    const { email, password } = req.body;
+    const isUser = await req.server.prisma.user.findUnique({  //prisma recherche dans la table user
+      where: {
+        email: email,
+    },
+    })
+    if (!isUser) {
+        reply.send({ message : "ce user n'existe pas en db"})
+    } else {
+        reply.send({ message : `utilisateur récupéré : ${email}, ${password}` })
+    }
+}

@@ -17,4 +17,12 @@ export const createUserResponseSchema = z.object({
 })
 
 
-
+export const loginUserSchema = z.object({
+    email: z.email(),
+    password: z.string().min(8)
+})
+export type LoginUserInput = z.infer<typeof loginUserSchema>
+export const loginUserResponseSchema = z.object({
+    email: z.email(),
+    username: z.string(),
+})

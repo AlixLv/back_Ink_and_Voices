@@ -27,6 +27,8 @@ model user {
   updated_at DateTime @updatedAt 
   validations book_validation[] // attribut à ajouter dans MCD et MLD
   //session Session? 
+
+  @@map("user")
 }
 
 enum role {

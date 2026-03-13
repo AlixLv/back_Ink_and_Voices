@@ -57,4 +57,8 @@ const start = async () => {
     }
   };
 
-start();
+if (import.meta.url === `file://${process.argv[1]}`) {
+  start();
+}
+
+export default app;

@@ -8,6 +8,9 @@ import { createUserSchema, createUserResponseSchema, loginUserSchema, loginUserR
 import { loginUserHandler } from './user.controller.js';
 
 
+export function faireUnTest(a : String) {
+    return a;
+}
 
 export async function userRoutes(app: FastifyInstance) {
   const server = app.withTypeProvider<ZodTypeProvider>()

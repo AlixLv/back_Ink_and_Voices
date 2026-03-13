@@ -19,7 +19,7 @@ export async function userRoutes(app: FastifyInstance) {
     reply.send({ message: '/ route hit success' })
   })
 
-  server.post('/register', {
+  server.post('/signup', {
     schema: {
       body: createUserSchema,
       response: {

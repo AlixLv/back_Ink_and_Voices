@@ -7,7 +7,9 @@
     "build": "tsc",
     "start": "node build/index.js",
     "dev": "tsx watch src/index.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest",
+    "test:run": "vitest run",
+    "coverage": "vitest run --coverage"
   },
   "repository": {
     "type": "git",
@@ -39,6 +41,7 @@
   "devDependencies": {
     "@types/node": "^24.10.9",
     "@types/pg": "^8.16.0",
-    "prisma": "^7.2.0"
+    "prisma": "^7.2.0",
+    "vitest": "^4.1.0"
   }
 }

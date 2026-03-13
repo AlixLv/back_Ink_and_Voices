@@ -1,5 +1,5 @@
 import { expect, expectTypeOf, test } from 'vitest'
-import { registerUserHandler } from './user.controller'
+import { signUp} from './user.controller'
 import { safeParse, z } from 'zod' 
 import { createUserSchema } from './user.schema'
 
@@ -15,7 +15,7 @@ test('username containing Ada equals to Ada', () => {
 
   // Vérification des types TypeScript
 test('my types work properly', () => {
-    expectTypeOf(registerUserHandler).toBeFunction()
+    expectTypeOf(signUp).toBeFunction()
     expectTypeOf({email: "ada@gmail.com"}).toEqualTypeOf<{email: string}>()
     expectTypeOf({username: "Ada"}).toEqualTypeOf<{username: string}>()
     expectTypeOf({password: "testpwd"}).toEqualTypeOf<{password: string}>()

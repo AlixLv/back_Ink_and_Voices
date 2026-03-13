@@ -3,7 +3,7 @@ import type { CreateUserInput } from './user.schema.js';
 import * as argon2 from 'argon2';
 
 
-export async function registerUserHandler(
+export async function signUp(
     req: FastifyRequest<{Body: CreateUserInput}>,
     reply: FastifyReply
 ){

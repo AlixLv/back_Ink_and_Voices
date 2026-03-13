@@ -23,4 +23,3 @@ export default defineConfig({
     url: databaseURL,
   },
 });
-console.log("🌼", process.env["DATABASE_URL"]);

@@ -1,10 +1,15 @@
-import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
-import { serializerCompiler, validatorCompiler, type ZodTypeProvider } from 'fastify-type-provider-zod';
+import type { FastifyInstance } from 'fastify'
 import { z } from 'zod';
+import {type ZodTypeProvider } from 'fastify-type-provider-zod';
+import { createUserSchema, createUserResponseSchema } from './user.schema.js';
+import { signUp } from './user.controller.js';
+
 
 export async function userRoutes(app: FastifyInstance) {
   // Utilisation de withTypeProvider pour avoir les types automatiques
-  app.withTypeProvider<ZodTypeProvider>().get('/', {
+  const server = app.withTypeProvider<ZodTypeProvider>()
+
+  server.get('/', {
     schema: {
       response:{
         200: z.object({message: z.string()})
@@ -14,23 +19,18 @@ export async function userRoutes(app: FastifyInstance) {
     reply.send({ message: '/ route hit success' })
   })
 
-  app.withTypeProvider<ZodTypeProvider>().post('/register', {
+  server.post('/signup', {
     schema: {
-      body: z.object({
-        email: z.email(),
-        password: z.string().min(8),
-        username: z.string()
-      })
+      body: createUserSchema,
+      response: {
+        201: createUserResponseSchema,
+      }
     }
-  }, async(req, reply) => {
-    const {email, password, username} = req.body
-    app.log.info(`Nouvel utilisateur créé: ${email}, ${username}`)
-    return { success: true }
-  })
+  }, signUp)
 
-  app.withTypeProvider<ZodTypeProvider>().post('/login', () => {})
+  server.post('/login', () => {})
 
-  app.withTypeProvider<ZodTypeProvider>().delete('/logout', () => {})
+  server.delete('/logout', () => {})
 
-  app.withTypeProvider<ZodTypeProvider>().log.info('user routes registered')
+  server.log.info('user routes registered')
 }

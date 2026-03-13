@@ -3,7 +3,10 @@ WORKDIR /app
 COPY package*.json .
 RUN npm install
 COPY . .
-# on complie TypeScript
+# on génère le client Prisma puis on compile TypeScript
+ARG NODE_ENV=production
+ARG DATABASE_URL
+RUN DATABASE_URL="${DATABASE_URL}" 
 RUN npm run build
 RUN addgroup -S app && adduser -S app -G app && chown -R app:app /app
 EXPOSE 8032

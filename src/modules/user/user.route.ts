@@ -22,7 +22,7 @@ export async function userRoutes(app: FastifyInstance) {
       } 
     }
   } , async (req, reply) => {
-    reply.send({ message: '/ route hitttt success' })
+    reply.send({ message: '/ route hit success' })
   })
 
   server.post('/signup', {

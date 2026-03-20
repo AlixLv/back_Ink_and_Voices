@@ -9,6 +9,9 @@
     "dev": "tsx watch src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "prisma": {
+    "seed": "npx tsx prisma/seed.ts"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/AlixLv/back_Ink_and_Voices.git"
@@ -36,6 +39,7 @@
   "devDependencies": {
     "@types/node": "^24.10.9",
     "@types/pg": "^8.16.0",
-    "prisma": "^7.2.0"
+    "prisma": "^7.2.0",
+    "tsx": "^4.21.0"
   }
 }

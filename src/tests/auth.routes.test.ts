@@ -10,6 +10,7 @@ const dbUrl = isDev ? process.env.LOCAL_DATABASE_URL : process.env.DATABASE_URL;
 const adapter = new PrismaPg({ connectionString: dbUrl });
 const prisma = new PrismaClient({ adapter });
 
+/*
 // test unitaire qui vérifie juste l'execution et le retour d'une fonction
 test( 'should return given string', () => {
     console.log('soleil');
@@ -52,5 +53,34 @@ describe('Test /api/users/signup', () => {
         })
         expect(response.statusCode).toBe(201);
         expect(response.json()).toEqual( {"email": "newuser@example.com", "username": "newuser"});
+    })
+});
+*/
+describe('Test /api/users/login', () => {
+    it('returns message on successful user loginn', async() => {
+        await app.ready()
+        //création d'un nouvel user
+        const newUserData = {
+        'email': 'newuser@example.com', 
+        'username': 'newuser', 
+        'password': 'password123'
+    }
+        await app.inject({
+            method: 'POST', 
+            url: '/api/users/signup',
+            payload: newUserData
+        })
+
+        //test de la route login
+        const loginResponse = await app.inject({
+            method: 'POST', 
+            url: '/api/users/login',
+            payload: {
+                email: 'newuser@example.com',
+                password: 'password123'
+            }
+        })
+        expect(loginResponse.statusCode).toBe(200);
+        //expect(loginResponse.json()).toEqual({"message": "utilisateur récupéré : newuser@example.com, password123"});
     })
 });

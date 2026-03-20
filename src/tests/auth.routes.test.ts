@@ -50,9 +50,6 @@ describe('Test /api/users/signup', () => {
             url: '/api/users/signup',
             payload: newUserData
         })
-        //console.log('Response:', response);
-        //console.log('Response body:', response.body);
-        console.log("hello!!!!!")
         expect(response.statusCode).toBe(201);
         expect(response.json()).toEqual( {"email": "newuser@example.com", "username": "newuser"});
     })

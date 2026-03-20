@@ -1,6 +1,6 @@
 name: Ink and Voices Workflow
 run-name: Ink and Voices workflow is running.
-on: [push]
+on: workflow_dispatch
 jobs:
   tests_workflow:
     runs-on: ubuntu-latest

@@ -4,6 +4,7 @@ import { PrismaClient } from './generated/prisma/client.js';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { authRoutes } from './modules/auth/auth.routes.js';
 import { userRoutes } from './modules/user/user.routes.js';
+import { bookRoutes } from './modules/book/book.route.js';
 import { serializerCompiler, validatorCompiler, type ZodTypeProvider } from 'fastify-type-provider-zod';
 import fastifyJwt from '@fastify/jwt';
 import fCookie from '@fastify/cookie';
@@ -79,6 +80,8 @@ app.decorate('authenticate', async function(
 // routes
 app.register(authRoutes, {prefix: 'api/auth'})
 app.register(userRoutes, {prefix: 'api/users'})
+
+app.register(bookRoutes, { prefix: '/api/books' });
 
 // graceful shutdown
 const listeners = ['SIGINT', 'SIGTERM']

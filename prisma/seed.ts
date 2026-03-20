@@ -140,7 +140,7 @@ const racismTheme = await prisma.theme.create({
 
   const book4 = await prisma.book.create({
     data: {
-      type_id: shortStoriesType.id,
+      type_id: novelType.id,
       title: 'Les Tentacules',
       author: 'Rita Indiana',
       publishing_house: "Rue de L'Échiquier",
@@ -153,6 +153,7 @@ const racismTheme = await prisma.theme.create({
       themes: {
         create: [
           { theme_id: feminismTheme.id },
+          { theme_id: ecologyTheme.id }
         ],
       },
     },

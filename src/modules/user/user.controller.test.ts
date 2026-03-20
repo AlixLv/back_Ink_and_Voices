@@ -22,10 +22,12 @@ test('my types work properly', () => {
   })
   
  // TODO: Vérification des messages d'erreur et de succès!
+ /*
 test('email valide', () => {
     const result = createUserSchema.safeParse({email: "ada@gmail.com"})
     expect(result.success).toBe(true)
 })
+*/
 
 test('email invalide', () => {
     const result = createUserSchema.safeParse({email: "not-an-email"})

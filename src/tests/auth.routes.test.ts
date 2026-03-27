@@ -13,7 +13,6 @@ const prisma = new PrismaClient({ adapter });
 
 // healthcheck
 test('GET / should return status OK', async() => {
-    console.log("DB URL:", process.env.DATABASE_URL)
     await app.ready();
     const response = await app.inject({
         method: 'GET', 
@@ -33,7 +32,7 @@ describe('Test /api/users/signup', () => {
              where: { email: 'newuser@example.com' }
       })
     })
-    it('returns message on successful user creation', async() => {
+    it('returns successful user creation', async() => {
         await app.ready()
         const newUserData = {
         'email': 'newuser@example.com', 
@@ -45,10 +44,12 @@ describe('Test /api/users/signup', () => {
             url: '/api/users/signup',
             payload: newUserData
         })
+        console.log(response.json)
         expect(response.statusCode).toBe(201);
         expect(response.json()).toEqual( {"email": "newuser@example.com", "username": "newuser"});
     })
 });
+
 
 // test d'intégration route login
 describe('Test /api/users/login', () => {
@@ -75,7 +76,11 @@ describe('Test /api/users/login', () => {
                 password: 'password123'
             }
         })
+        const body = loginResponse.json()
         expect(loginResponse.statusCode).toBe(200);
-        expect(loginResponse.json()).toEqual({"message": "utilisateur récupéré : newuser@example.com, password123"});
+        expect(body.email).toBe('newuser@example.com');
+        expect(body.username).toBe('newuser');
+        expect(body.token).toBeDefined();
     })
 });
+

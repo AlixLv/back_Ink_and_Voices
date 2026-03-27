@@ -25,4 +25,5 @@ export type LoginUserInput = z.infer<typeof loginUserSchema>
 export const loginUserResponseSchema = z.object({
     email: z.email(),
     username: z.string(),
+    token: z.string()
 })

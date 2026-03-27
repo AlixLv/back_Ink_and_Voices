@@ -3,6 +3,7 @@ import { PrismaClient } from './generated/prisma/client.js';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { userRoutes } from './modules/user/user.route.js';
 import { serializerCompiler, validatorCompiler, type ZodTypeProvider } from 'fastify-type-provider-zod';
+import fastifyJwt from '@fastify/jwt';
 
 
 // 1. Configuration de la Base de Données (Le tuyau DB)
@@ -34,6 +35,10 @@ app.decorate('prisma', prisma);
   // Si notre objet contient des data pas présentent dans le schéma, il ne les envoie pas au client
   app.setSerializerCompiler(serializerCompiler)
 
+// JWT
+await app.register(fastifyJwt, {
+  secret: process.env.JWT_SECRET || 'your-secret-key'
+});
 
 // routes
 app.register(userRoutes, {prefix: 'api/users'})

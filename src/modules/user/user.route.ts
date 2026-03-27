@@ -38,7 +38,7 @@ export async function userRoutes(app: FastifyInstance) {
   server.post('/login', {
     schema: {
       body: loginUserSchema,
-      reponse: {
+      response: {
         200: loginUserResponseSchema,
       }
     }

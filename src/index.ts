@@ -1,4 +1,5 @@
 import Fastify from 'fastify';
+import cors from "@fastify/cors";
 import { PrismaClient } from './generated/prisma/client.js';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { userRoutes } from './modules/user/auth.routes.js';
@@ -11,14 +12,12 @@ const isDev = process.env.NODE_ENV !== 'production';
 const dbUrl = isDev ? process.env.LOCAL_DATABASE_URL : process.env.DATABASE_URL;
 
 const adapter = new PrismaPg({ connectionString: dbUrl });
-const prisma = new PrismaClient({ adapter });
+export const prisma = new PrismaClient({ adapter });
 
 // 2. Configuration du Serveur (Le tuyau Web)
-const app = Fastify({ logger: true }).withTypeProvider<ZodTypeProvider>();
+export const app = Fastify({ logger: true }).withTypeProvider<ZodTypeProvider>();
 const { ADDRESS = '0.0.0.0', PORT = '8032' } = process.env;
 
-// 3. Liaison
-app.decorate('prisma', prisma);
 
 // const app = Fastify({logger: true}).withTypeProvider<ZodTypeProvider>();
 // const { ADDRESS = '0.0.0.0', PORT = '8000' } = process.env;
@@ -35,10 +34,19 @@ app.decorate('prisma', prisma);
   // Si notre objet contient des data pas présentent dans le schéma, il ne les envoie pas au client
   app.setSerializerCompiler(serializerCompiler)
 
+<<<<<<< HEAD
 // JWT
 await app.register(fastifyJwt, {
   secret: process.env.JWT_SECRET || 'your-secret-key'
 });
+=======
+app.decorate('prisma', prisma);
+
+await app.register(cors, {
+    origin: 'http://localhost:5177',
+    methods: ['GET', 'POST', 'PUT', 'DELETE']
+  });
+>>>>>>> fe417ec (feature: ajout du module @fastify/cors pour accepter requêtes provenant du front + update index.ts pour ajouter le décorateur cors et le décorateur prisma à app)
 
 // routes
 app.register(userRoutes, {prefix: 'api/users'})

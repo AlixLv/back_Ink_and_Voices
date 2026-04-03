@@ -8,7 +8,7 @@ export async function signUp(
     req: FastifyRequest<{Body: CreateUserInput}>,
     reply: FastifyReply
 ){
-    const { email, username, password } = req.body;
+    const { username, email, password } = req.body;
     const isUser = await req.server.prisma.user.findUnique({
         where: {
             email: email,

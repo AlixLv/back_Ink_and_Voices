@@ -2,8 +2,8 @@ import {z} from 'zod';
 
 // data/input du user dont on a besoin pour la creation de compte
 export const createUserSchema = z.object({
-    email: z.email(),
     username: z.string(),
+    email: z.email(),
     password: z.string().min(8),
 })
 
@@ -12,10 +12,9 @@ export type CreateUserInput = z.infer<typeof createUserSchema>
 
 // schema de reponse envoyé au front une fois le user registered
 export const createUserResponseSchema = z.object({
-    email: z.email(),
     username: z.string(),
+    email: z.email()
 })
-
 
 export const loginUserSchema = z.object({
     email: z.email(),

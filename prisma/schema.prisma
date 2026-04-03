@@ -49,7 +49,7 @@ model book {
   reference_link String?
   short_description String @db.Text
   status status @default(pending)
-  user_id String @unique
+  user_id String
   user user @relation(fields: [user_id], references:[id])
   created_at DateTime @default(now())
   validations book_validation[]

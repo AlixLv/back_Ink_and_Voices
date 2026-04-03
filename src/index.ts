@@ -1,7 +1,7 @@
 import Fastify from 'fastify';
 import { PrismaClient } from './generated/prisma/client.js';
 import { PrismaPg } from '@prisma/adapter-pg';
-import { userRoutes } from './modules/user/user.route.js';
+import { userRoutes } from './modules/user/auth.routes.js';
 import { serializerCompiler, validatorCompiler, type ZodTypeProvider } from 'fastify-type-provider-zod';
 import fastifyJwt from '@fastify/jwt';
 

@@ -2,10 +2,10 @@ import type { FastifyInstance } from 'fastify'
 import { z } from 'zod';
 import {type ZodTypeProvider } from 'fastify-type-provider-zod';
 
-import { signUp } from './user.controller.js';
+import { signUp } from './auth.controller.js';
 
 import { createUserSchema, createUserResponseSchema, loginUserSchema, loginUserResponseSchema } from './user.schema.js';
-import { loginUserHandler } from './user.controller.js';
+import { loginUserHandler } from './auth.controller.js';
 
 
 export function faireUnTest(a : String) {

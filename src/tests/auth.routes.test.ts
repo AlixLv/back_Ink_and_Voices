@@ -1,7 +1,5 @@
 import app from '../index';
 import { test, expect, it, describe, beforeEach } from 'vitest';
-import { faireUnTest } from '../modules/user/user.route'
-import { request } from 'https';
 import { PrismaClient } from '../generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 
@@ -27,16 +25,15 @@ test('GET / should return status OK', async() => {
 // test d'intégration route signup
 describe('Test /api/users/signup', () => {
     beforeEach(async() => {
-        // Supprime l'utilisateur avant chaque test
         await prisma.user.deleteMany({
-             where: { email: 'newuser@example.com' }
+             where: { email: 'signupuser@example.com' }
       })
     })
     it('returns successful user creation', async() => {
         await app.ready()
         const newUserData = {
-        'email': 'newuser@example.com', 
-        'username': 'newuser', 
+        'email': 'signupuser@example.com', 
+        'username': 'signupuser', 
         'password': 'password123'
     }
         const response = await app.inject({
@@ -44,21 +41,24 @@ describe('Test /api/users/signup', () => {
             url: '/api/users/signup',
             payload: newUserData
         })
-        console.log(response.json)
         expect(response.statusCode).toBe(201);
-        expect(response.json()).toEqual( {"email": "newuser@example.com", "username": "newuser"});
+        expect(response.json()).toEqual( {"email": "signupuser@example.com", "username": "signupuser"});
     })
 });
 
 
 // test d'intégration route login
 describe('Test /api/users/login', () => {
+    beforeEach(async() => {
+        await prisma.user.deleteMany({
+             where: { email: 'loginuser@example.com' }
+      })
+    })
     it('returns message on successful user loginn', async() => {
         await app.ready()
-        //création d'un nouvel user
         const newUserData = {
-        'email': 'newuser@example.com', 
-        'username': 'newuser', 
+        'email': 'loginuser@example.com', 
+        'username': 'loginuser', 
         'password': 'password123'
     }
         await app.inject({
@@ -66,20 +66,18 @@ describe('Test /api/users/login', () => {
             url: '/api/users/signup',
             payload: newUserData
         })
-
-        //test de la route login
         const loginResponse = await app.inject({
             method: 'POST', 
             url: '/api/users/login',
             payload: {
-                email: 'newuser@example.com',
+                email: 'loginuser@example.com',
                 password: 'password123'
             }
         })
         const body = loginResponse.json()
         expect(loginResponse.statusCode).toBe(200);
-        expect(body.email).toBe('newuser@example.com');
-        expect(body.username).toBe('newuser');
+        expect(body.email).toBe('loginuser@example.com');
+        expect(body.username).toBe('loginuser');
         expect(body.token).toBeDefined();
     })
 });

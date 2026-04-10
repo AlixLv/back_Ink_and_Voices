@@ -37,6 +37,7 @@ async function main() {
 
   console.log("🪪 Users: ", { regularUser, adminUser })
 
+//remplacer les create() par des upsert pour éviter les doublons à chaque lancement du seed. 
 const novelType = await prisma.type.create({
     data: {
       type_name: 'Roman',

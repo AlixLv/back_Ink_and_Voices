@@ -2,12 +2,15 @@ import type { FastifyInstance } from 'fastify'
 import { z } from 'zod';
 import {type ZodTypeProvider } from 'fastify-type-provider-zod';
 
-import { signUp } from './user.controller.js';
+import { signUp } from './auth.controller.js';
 
 import { createUserSchema, createUserResponseSchema, loginUserSchema, loginUserResponseSchema } from './user.schema.js';
-import { loginUserHandler } from './user.controller.js';
+import { loginUserHandler } from './auth.controller.js';
 
 
+export function faireUnTest(a : String) {
+    return a;
+}
 
 export async function userRoutes(app: FastifyInstance) {
   const server = app.withTypeProvider<ZodTypeProvider>()
@@ -19,7 +22,7 @@ export async function userRoutes(app: FastifyInstance) {
       } 
     }
   } , async (req, reply) => {
-    reply.send({ message: '/ route hitttt success' })
+    reply.send({ message: '/ route hit success' })
   })
 
   server.post('/signup', {
@@ -35,7 +38,7 @@ export async function userRoutes(app: FastifyInstance) {
   server.post('/login', {
     schema: {
       body: loginUserSchema,
-      reponse: {
+      response: {
         200: loginUserResponseSchema,
       }
     }

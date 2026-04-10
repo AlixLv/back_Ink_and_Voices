@@ -40,18 +40,19 @@ export async function loginUserHandler(
     reply: FastifyReply
 ){
     const { email, password } = req.body;
-    const isUser = await req.server.prisma.user.findUnique({  //prisma recherche dans la table user
+    const user = await req.server.prisma.user.findUnique({  //prisma recherche dans la table user
       where: {
         email: email,
     },
     })
-    if (!isUser) {
+    if (!user) {
         return reply.code(404).send({ message : "ce user n'existe pas en db"});
     } else {
         try {
-            const hashPassword = isUser.password;
+            const hashPassword = user.password;
             if (await argon2.verify(hashPassword, password)) {
-                return reply.code(200).send({ message : `utilisateur récupéré : ${email}, ${password}` });
+                const token = req.server.jwt.sign({ email: user.email, username: user.username });
+                return reply.code(200).send({ email: user.email, username: user.username, token });
             } else {
                 return reply.code(404).send({message: "email ou mot de passe incorrect"})
             }

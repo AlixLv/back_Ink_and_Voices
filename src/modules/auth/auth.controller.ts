@@ -58,7 +58,8 @@ export async function loginUserHandler(
                     httpOnly: true,
                     secure: process.env.NODE_ENV === 'production',
                     sameSite: 'strict',
-                    maxAge: 14 * 24 * 60 * 60 * 1000 // 14 jours
+                    maxAge: 14 * 24 * 60 * 60, // 14 jours en secondes
+                    path: '/'
                 })
                 return reply.code(200).send({ email: user.email, username: user.username, token: token });
             } else {

@@ -47,7 +47,7 @@ app.decorate('authenticate', async function(
   req: FastifyRequest,
   reply: FastifyReply) {
     try {
-        await req.jwtVerify()
+        await req.jwtVerify({ onlyCookie: true })
     } catch (err){
         reply.code(401).send({message: "Token invalide ou absent"})
   }

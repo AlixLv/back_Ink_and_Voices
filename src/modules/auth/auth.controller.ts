@@ -1,6 +1,7 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { CreateUserInput, LoginUserInput } from './auth.schema.js';
 import * as argon2 from 'argon2';
+import fCookie from '@fastify/cookie';
 import { is } from 'zod/v4/locales';
 
 
@@ -53,7 +54,13 @@ export async function loginUserHandler(
             const hashPassword = user.password;
             if (await argon2.verify(hashPassword, password)) {
                 const token = req.server.jwt.sign({ id: user.id });
-                return reply.code(200).send({ email: user.email, username: user.username, token });
+                reply.setCookie('access_token', token, {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === 'production',
+                    sameSite: 'strict',
+                    maxAge: 14 * 24 * 60 * 60 * 1000 // 14 jours
+                })
+                return reply.code(200).send({ email: user.email, username: user.username, token: token });
             } else {
                 return reply.code(404).send({message: "email ou mot de passe incorrect"})
             }

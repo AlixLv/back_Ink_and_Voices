@@ -5,6 +5,7 @@ import { authRoutes } from './modules/auth/auth.routes.js';
 import { userRoutes } from './modules/user/user.routes.js';
 import { serializerCompiler, validatorCompiler, type ZodTypeProvider } from 'fastify-type-provider-zod';
 import fastifyJwt from '@fastify/jwt';
+import fCookie from '@fastify/cookie';
 
 
 // 1. Configuration de la Base de Données (Le tuyau DB)
@@ -42,14 +43,19 @@ await app.register(fastifyJwt, {
 });
 
 // Déclaration de authenticate, qui sera utilisé sur les routes protégées
-app.decorate("authenticate", async function(
+app.decorate('authenticate', async function(
   req: FastifyRequest,
-  reply: FastifyReply){
+  reply: FastifyReply) {
     try {
         await req.jwtVerify()
     } catch (err){
-        reply.send(err)
+        reply.code(401).send({message: "Token invalide ou absent"})
   }
+})
+
+app.register(fCookie, {
+  secret: process.env.COOKIE_SECRET_KEY ?? 'your-secret-key',
+  hook: 'preHandler',
 })
 
 // routes

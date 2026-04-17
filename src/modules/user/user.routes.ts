@@ -11,6 +11,7 @@ export async function userRoutes(app: FastifyInstance){
     const server = app.withTypeProvider<ZodTypeProvider>()
 
     server.get('/profile', {
+        onRequest: [app.authenticate],
         schema: {
             response:{
                 200: userProfileResponseSchema,

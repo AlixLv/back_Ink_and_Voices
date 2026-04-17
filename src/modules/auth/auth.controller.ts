@@ -52,7 +52,7 @@ export async function loginUserHandler(
         try {
             const hashPassword = user.password;
             if (await argon2.verify(hashPassword, password)) {
-                const token = req.server.jwt.sign({ email: user.email, username: user.username });
+                const token = req.server.jwt.sign({ id: user.id });
                 return reply.code(200).send({ email: user.email, username: user.username, token });
             } else {
                 return reply.code(404).send({message: "email ou mot de passe incorrect"})

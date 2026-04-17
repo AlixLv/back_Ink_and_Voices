@@ -1,4 +1,4 @@
-import Fastify from 'fastify';
+import Fastify, { fastify, type FastifyReply, type FastifyRequest } from 'fastify';
 import { PrismaClient } from './generated/prisma/client.js';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { authRoutes } from './modules/auth/auth.routes.js';
@@ -40,6 +40,17 @@ app.decorate('prisma', prisma);
 await app.register(fastifyJwt, {
   secret: process.env.JWT_SECRET || 'your-secret-key'
 });
+
+// Déclaration de authenticate, qui sera utilisé sur les routes protégées
+app.decorate("authenticate", async function(
+  req: FastifyRequest,
+  reply: FastifyReply){
+    try {
+        await req.jwtVerify()
+    } catch (err){
+        reply.send(err)
+  }
+})
 
 // routes
 app.register(authRoutes, {prefix: 'api/auth'})

@@ -1,5 +1,5 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import type { CreateUserInput, LoginUserInput } from './user.schema.js';
+import type { CreateUserInput, LoginUserInput } from './auth.schema.js';
 import * as argon2 from 'argon2';
 import { is } from 'zod/v4/locales';
 
@@ -34,6 +34,7 @@ export async function signUp(
     }
 }
 
+
 // pour l'instant, on vérifie s'il y a un user avec cet email. Si c'est le cas, on revoie un message "user récupéré" avec email et pw de la requête
 export async function loginUserHandler(
     req: FastifyRequest<{Body: LoginUserInput}>,
@@ -46,7 +47,7 @@ export async function loginUserHandler(
     },
     })
     if (!user) {
-        return reply.code(404).send({ message : "ce user n'existe pas en db"});
+        return reply.code(404).send({ message: "ce user n'existe pas en db"});
     } else {
         try {
             const hashPassword = user.password;

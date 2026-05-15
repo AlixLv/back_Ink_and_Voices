@@ -1,6 +1,7 @@
 import Fastify, { fastify, type FastifyReply, type FastifyRequest } from 'fastify';
 import { PrismaClient } from './generated/prisma/client.js';
 import { PrismaPg } from '@prisma/adapter-pg';
+import cors from '@fastify/cors';
 import { authRoutes } from './modules/auth/auth.routes.js';
 import { userRoutes } from './modules/user/user.routes.js';
 import { serializerCompiler, validatorCompiler, type ZodTypeProvider } from 'fastify-type-provider-zod';
@@ -41,6 +42,12 @@ app.decorate('prisma', prisma);
 await app.register(fastifyJwt, {
   secret: process.env.JWT_SECRET || 'your-secret-key'
 });
+
+// identification du frontend pour accepter ses requêtes côté backend
+await app.register(cors, {
+  origin:'http://localhost:5177',
+  methods: ['GET', 'POST', 'PUT', 'DELETE']
+})
 
 // Déclaration de authenticate, qui sera utilisé sur les routes protégées
 app.decorate('authenticate', async function(

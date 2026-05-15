@@ -31,6 +31,7 @@ export async function signUp(
         })
         return reply.code(201).send(user)
     } catch (e){
+        console.log("🚨 error: ", e)
         return reply.code(500).send(e)
     }
 }
@@ -56,7 +57,7 @@ export async function loginUserHandler(
                 const token = req.server.jwt.sign({ id: user.id });
                 reply.setCookie('access_token', token, {
                     httpOnly: true,
-                    secure: process.env.NODE_ENV === 'production',
+                    secure: process.env.NODE_ENV === 'development',
                     sameSite: 'strict',
                     maxAge: 14 * 24 * 60 * 60, // 14 jours en secondes
                     path: '/'

@@ -1,10 +1,6 @@
 import {z} from 'zod';
 
-export const userProfileResponseSchema = z.object({
-    email: z.email(),
-    username: z.string(),
-})
-
+// data/input du user 
 export const updateUserSchema = z.object({
     email: z.string(),
     username: z.string(),
@@ -13,3 +9,8 @@ export const updateUserSchema = z.object({
 
 export type UpdateUserProfile = z.infer<typeof updateUserSchema>
 
+// reponse envoyée au front
+export const userProfileResponseSchema = z.object({
+    email: z.email(),
+    username: z.string(),
+})

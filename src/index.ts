@@ -38,16 +38,16 @@ app.decorate('prisma', prisma);
   // Si notre objet contient des data pas présentent dans le schéma, il ne les envoie pas au client
   app.setSerializerCompiler(serializerCompiler)
 
-// JWT
-await app.register(fastifyJwt, {
-  secret: process.env.JWT_SECRET || 'your-secret-key'
-});
-
 // identification du frontend pour accepter ses requêtes côté backend
 await app.register(cors, {
   origin:'http://localhost:5177',
   methods: ['GET', 'POST', 'PUT', 'DELETE']
 })
+  
+// JWT
+await app.register(fastifyJwt, {
+  secret: process.env.JWT_SECRET || 'your-secret-key'
+});
 
 // Déclaration de authenticate, qui sera utilisé sur les routes protégées
 app.decorate('authenticate', async function(

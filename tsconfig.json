@@ -40,7 +40,7 @@
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
-    "ignoreDeprecations": "6.0",
+    //"ignoreDeprecations": "6.0",
     "skipLibCheck": true,
     "esModuleInterop": true // Permet l'utilisation de import avec des modules CommonJS
   },

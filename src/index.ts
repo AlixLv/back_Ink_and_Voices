@@ -41,7 +41,8 @@ app.decorate('prisma', prisma);
 // identification du frontend pour accepter ses requêtes côté backend
 await app.register(cors, {
   origin:'http://localhost:5177',
-  methods: ['GET', 'POST', 'PUT', 'DELETE']
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true //pour que backend accepte bien le cookie contenant l'access_token du front
 })
   
 // JWT

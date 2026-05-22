@@ -57,7 +57,7 @@ export async function loginUserHandler(
                 const token = req.server.jwt.sign({ id: user.id });
                 reply.setCookie('access_token', token, {
                     httpOnly: true,
-                    secure: process.env.NODE_ENV === 'development',
+                    secure: process.env.NODE_ENV === 'production', // dev
                     sameSite: 'strict',
                     maxAge: 14 * 24 * 60 * 60, // 14 jours en secondes
                     path: '/'

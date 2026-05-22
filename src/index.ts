@@ -46,23 +46,32 @@ await app.register(cors, {
   
 // JWT
 await app.register(fastifyJwt, {
-  secret: process.env.JWT_SECRET || 'your-secret-key'
+  secret: process.env.JWT_SECRET || 'your-secret-key',
+  cookie: {
+    cookieName: 'access_token',
+    signed:false
+  }
 });
+
+// plugin Cookie 
+await app.register(fCookie, {
+  secret: process.env.COOKIE_SECRET_KEY ?? 'your-secret-key',
+  hook: 'preHandler',
+})
 
 // Déclaration de authenticate, qui sera utilisé sur les routes protégées
 app.decorate('authenticate', async function(
   req: FastifyRequest,
   reply: FastifyReply) {
     try {
+        console.log('🍪 Cookies reçus:', req.cookies);
+        console.log('🔑 Headers reçus:', req.headers);
         await req.jwtVerify({ onlyCookie: true })
+        console.log('✅ Token vérifié avec succès')
     } catch (err){
+        console.log('❌ Erreur JWT:', err);
         reply.code(401).send({message: "Token invalide ou absent"})
   }
-})
-
-app.register(fCookie, {
-  secret: process.env.COOKIE_SECRET_KEY ?? 'your-secret-key',
-  hook: 'preHandler',
 })
 
 // routes

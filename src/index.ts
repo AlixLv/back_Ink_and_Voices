@@ -4,7 +4,7 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { userRoutes } from './modules/user/auth.routes.js';
 import { serializerCompiler, validatorCompiler, type ZodTypeProvider } from 'fastify-type-provider-zod';
 import fastifyJwt from '@fastify/jwt';
-
+import cors from '@fastify/cors';
 
 // 1. Configuration de la Base de Données (Le tuyau DB)
 const isDev = process.env.NODE_ENV !== 'production';
@@ -39,6 +39,12 @@ app.decorate('prisma', prisma);
 await app.register(fastifyJwt, {
   secret: process.env.JWT_SECRET || 'your-secret-key'
 });
+
+// Ce bloc sert à corriger les problèmes de CORS quand on branche le front au back, mais on n'est pas sûrs que ça serve vraiment.
+await app.register(cors, {
+  origin:'http://localhost:5177',
+  methods: ['GET', 'POST', 'PUT', 'DELETE']
+})
 
 // routes
 app.register(userRoutes, {prefix: 'api/users'})

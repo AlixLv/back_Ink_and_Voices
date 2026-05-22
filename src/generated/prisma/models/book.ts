@@ -303,7 +303,6 @@ export type bookOrderByWithRelationInput = {
 
 export type bookWhereUniqueInput = Prisma.AtLeast<{
   id?: number
-  user_id?: string
   AND?: Prisma.bookWhereInput | Prisma.bookWhereInput[]
   OR?: Prisma.bookWhereInput[]
   NOT?: Prisma.bookWhereInput | Prisma.bookWhereInput[]
@@ -316,12 +315,13 @@ export type bookWhereUniqueInput = Prisma.AtLeast<{
   reference_link?: Prisma.StringNullableFilter<"book"> | string | null
   short_description?: Prisma.StringFilter<"book"> | string
   status?: Prisma.EnumstatusFilter<"book"> | $Enums.status
+  user_id?: Prisma.StringFilter<"book"> | string
   created_at?: Prisma.DateTimeFilter<"book"> | Date | string
   type?: Prisma.XOR<Prisma.TypeScalarRelationFilter, Prisma.typeWhereInput>
   themes?: Prisma.Theme_bookListRelationFilter
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.userWhereInput>
   validations?: Prisma.Book_validationListRelationFilter
-}, "id" | "user_id">
+}, "id">
 
 export type bookOrderByWithAggregationInput = {
   id?: Prisma.SortOrder

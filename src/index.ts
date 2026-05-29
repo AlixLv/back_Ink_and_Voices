@@ -34,19 +34,16 @@ const { ADDRESS = '0.0.0.0', PORT = '8032' } = process.env;
   // Si notre objet contient des data pas présentent dans le schéma, il ne les envoie pas au client
   app.setSerializerCompiler(serializerCompiler)
 
-<<<<<<< HEAD
 // JWT
 await app.register(fastifyJwt, {
   secret: process.env.JWT_SECRET || 'your-secret-key'
 });
-=======
 app.decorate('prisma', prisma);
 
 await app.register(cors, {
     origin: 'http://localhost:5177',
     methods: ['GET', 'POST', 'PUT', 'DELETE']
   });
->>>>>>> fe417ec (feature: ajout du module @fastify/cors pour accepter requêtes provenant du front + update index.ts pour ajouter le décorateur cors et le décorateur prisma à app)
 
 // routes
 app.register(userRoutes, {prefix: 'api/users'})

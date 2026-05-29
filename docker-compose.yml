@@ -50,6 +50,8 @@ services:
     #command: npm run dev  
 
   prod:
+    profiles:
+      - prod
     build:
       context: .
       args:

@@ -4,3 +4,4 @@ build
 /src/index.js
 /generated/prisma
 /src/generated/prisma
+docker-compose.yml

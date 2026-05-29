@@ -8,6 +8,10 @@ services:
     - POSTGRES_USER=${POSTGRES_USER}
     - POSTGRES_PASSWORD=${POSTGRES_PW}
     - POSTGRES_DB=${POSTGRES_DB}
+    - NODE_ENV=development
+    - ADDRESS=0.0.0.0
+    - PORT=8032
+    - DATABASE_URL=${LOCAL_DATABASE_URL} #Ce bloc est en doublon (services postgres et dev) et ne devrait pas être dans le service postgres. Ca n'a pas d'incidence.
     ports:
       - "5432:5432"
     volumes:
@@ -55,7 +59,7 @@ services:
     build:
       context: .
       args:
-        - DATABASE_URL:${LOCAL_DATABASE_URL}
+        - DATABASE_URL:${LOCAL_DATABASE_URL} # Ca devrait être un égal au lieu de deux points ici. A voir si ça marche quand on lance la prod!
     ports:
       - "8001:8001"
     environment:

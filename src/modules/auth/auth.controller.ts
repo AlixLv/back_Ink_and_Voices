@@ -1,6 +1,7 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import type { CreateUserInput, LoginUserInput } from './user.schema.js';
+import type { CreateUserInput, LoginUserInput } from './auth.schema.js';
 import * as argon2 from 'argon2';
+import fCookie from '@fastify/cookie';
 import { is } from 'zod/v4/locales';
 
 
@@ -8,7 +9,7 @@ export async function signUp(
     req: FastifyRequest<{Body: CreateUserInput}>,
     reply: FastifyReply
 ){
-    const { username, email, password } = req.body;
+    const { email, username, password } = req.body;
     const isUser = await req.server.prisma.user.findUnique({
         where: {
             email: email,
@@ -46,13 +47,20 @@ export async function loginUserHandler(
     },
     })
     if (!user) {
-        return reply.code(404).send({ message : "ce user n'existe pas en db"});
+        return reply.code(404).send({ message: "ce user n'existe pas en db"});
     } else {
         try {
             const hashPassword = user.password;
             if (await argon2.verify(hashPassword, password)) {
-                const token = req.server.jwt.sign({ email: user.email, username: user.username });
-                return reply.code(200).send({ email: user.email, username: user.username, token });
+                const token = req.server.jwt.sign({ id: user.id });
+                reply.setCookie('access_token', token, {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === 'production', // dev
+                    sameSite: 'strict',
+                    maxAge: 14 * 24 * 60 * 60, // 14 jours en secondes
+                    path: '/'
+                })
+                return reply.code(200).send({ email: user.email, username: user.username, token: token });
             } else {
                 return reply.code(404).send({message: "email ou mot de passe incorrect"})
             }

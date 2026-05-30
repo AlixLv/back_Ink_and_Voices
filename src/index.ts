@@ -1,10 +1,12 @@
-import Fastify from 'fastify';
+import Fastify, { fastify, type FastifyReply, type FastifyRequest } from 'fastify';
 import cors from "@fastify/cors";
 import { PrismaClient } from './generated/prisma/client.js';
 import { PrismaPg } from '@prisma/adapter-pg';
-import { userRoutes } from './modules/user/auth.routes.js';
+import { authRoutes } from './modules/auth/auth.routes.js';
+import { userRoutes } from './modules/user/user.routes.js';
 import { serializerCompiler, validatorCompiler, type ZodTypeProvider } from 'fastify-type-provider-zod';
 import fastifyJwt from '@fastify/jwt';
+import fCookie from '@fastify/cookie';
 
 
 // 1. Configuration de la Base de Données (Le tuyau DB)
@@ -12,40 +14,65 @@ const isDev = process.env.NODE_ENV !== 'production';
 const dbUrl = isDev ? process.env.LOCAL_DATABASE_URL : process.env.DATABASE_URL;
 
 const adapter = new PrismaPg({ connectionString: dbUrl });
-export const prisma = new PrismaClient({ adapter });
+const prisma = new PrismaClient({ adapter });
 
 // 2. Configuration du Serveur (Le tuyau Web)
-export const app = Fastify({ logger: true }).withTypeProvider<ZodTypeProvider>();
+const app = Fastify({ logger: true }).withTypeProvider<ZodTypeProvider>();
 const { ADDRESS = '0.0.0.0', PORT = '8032' } = process.env;
 
+// 3. Liaison
+app.decorate('prisma', prisma);
 
-// const app = Fastify({logger: true}).withTypeProvider<ZodTypeProvider>();
-// const { ADDRESS = '0.0.0.0', PORT = '8000' } = process.env;
-// const adapter = new PrismaPg({ connectionString: process.env['LOCAL_DATABASE_URL'] });
-// const prisma = new PrismaClient({ adapter });
 
-  // sorte de portier qui va vérifier que les données envoyées dans la req correspondent bien au schéma Zod déclaré
-  // si les données sont valides, il laisse passer la req et remplit res.body avec les données typées
-  // si les donnée sont invalides, il bloque la req et renvoie une erreur 400 Bad Request au client
-  app.setValidatorCompiler(validatorCompiler)
-  // contrôleur qualité de nos responses
-  // on définit un schéma Zod pour renvoyer des data dans les responses 200, le SerializerCompiler prend l'objet qu'on retourne
-  // il le transforme en chaîne JSON en suivant le schema Zod. 
-  // Si notre objet contient des data pas présentent dans le schéma, il ne les envoie pas au client
-  app.setSerializerCompiler(serializerCompiler)
+// sorte de portier qui va vérifier que les données envoyées dans la req correspondent bien au schéma Zod déclaré
+// si les données sont valides, il laisse passer la req et remplit res.body avec les données typées
+// si les donnée sont invalides, il bloque la req et renvoie une erreur 400 Bad Request au client
+app.setValidatorCompiler(validatorCompiler)
+// contrôleur qualité de nos responses
+// on définit un schéma Zod pour renvoyer des data dans les responses 200, le SerializerCompiler prend l'objet qu'on retourne
+// il le transforme en chaîne JSON en suivant le schema Zod. 
+// Si notre objet contient des data pas présentent dans le schéma, il ne les envoie pas au client
+app.setSerializerCompiler(serializerCompiler)
+
+// identification du frontend pour accepter ses requêtes côté backend
+await app.register(cors, {
+    origin: 'http://localhost:5177',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true //pour que backend accepte bien le cookie contenant l'access_token du front
+  });
 
 // JWT
 await app.register(fastifyJwt, {
-  secret: process.env.JWT_SECRET || 'your-secret-key'
+  secret: process.env.JWT_SECRET || 'your-secret-key',
+  cookie: {
+    cookieName: 'access_token',
+    signed:false
+  }
 });
-app.decorate('prisma', prisma);
 
-await app.register(cors, {
-    origin: 'http://localhost:5177',
-    methods: ['GET', 'POST', 'PUT', 'DELETE']
-  });
+// plugin Cookie 
+await app.register(fCookie, {
+  secret: process.env.COOKIE_SECRET_KEY ?? 'your-secret-key',
+  hook: 'preHandler',
+})
+
+// Déclaration de authenticate, qui sera utilisé sur les routes protégées
+app.decorate('authenticate', async function(
+  req: FastifyRequest,
+  reply: FastifyReply) {
+    try {
+        console.log('🍪 Cookies reçus:', req.cookies);
+        console.log('🔑 Headers reçus:', req.headers);
+        await req.jwtVerify({ onlyCookie: true })
+        console.log('✅ Token vérifié avec succès')
+    } catch (err){
+        console.log('❌ Erreur JWT:', err);
+        reply.code(401).send({message: "Token invalide ou absent"})
+  }
+})
 
 // routes
+app.register(authRoutes, {prefix: 'api/auth'})
 app.register(userRoutes, {prefix: 'api/users'})
 
 // graceful shutdown

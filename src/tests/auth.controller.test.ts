@@ -1,6 +1,6 @@
 import { expect, expectTypeOf, test } from 'vitest'
-import { createUserSchema } from '../modules/user/user.schema'
-import { signUp } from '../modules/user/auth.controller'
+import { createUserSchema } from '../modules/auth/auth.schema'
+import { signUp } from '../modules/auth/auth.controller'
 import 'dotenv/config'
 
  // TODO: Vérification des messages d'erreur et de succès!

@@ -14,16 +14,17 @@ test('GET / should return status OK', async() => {
     await app.ready();
     const response = await app.inject({
         method: 'GET', 
-        url: '/api/users/'
+        url: '/api/auth/' 
     });
     expect(response.statusCode).toBe(200);
     expect(response.json()).toEqual({ message: '/ route hit success' });
+    console.log("response du inject: ", response)
 });
 
 
 
 // test d'intégration route signup
-describe('Test /api/users/signup', () => {
+describe('Test /api/auth/signup', () => { 
     beforeEach(async() => {
         await prisma.user.deleteMany({
              where: { email: 'signupuser@example.com' }
@@ -38,7 +39,7 @@ describe('Test /api/users/signup', () => {
     }
         const response = await app.inject({
             method: 'POST', 
-            url: '/api/users/signup',
+            url: '/api/auth/signup',  
             payload: newUserData
         })
         expect(response.statusCode).toBe(201);
@@ -48,7 +49,7 @@ describe('Test /api/users/signup', () => {
 
 
 // test d'intégration route login
-describe('Test /api/users/login', () => {
+describe('Test /api/auth/login', () => { 
     beforeEach(async() => {
         await prisma.user.deleteMany({
              where: { email: 'loginuser@example.com' }
@@ -63,12 +64,12 @@ describe('Test /api/users/login', () => {
     }
         await app.inject({
             method: 'POST', 
-            url: '/api/users/signup',
+            url: '/api/auth/signup', 
             payload: newUserData
         })
         const loginResponse = await app.inject({
             method: 'POST', 
-            url: '/api/users/login',
+            url: '/api/auth/login', 
             payload: {
                 email: 'loginuser@example.com',
                 password: 'password123'

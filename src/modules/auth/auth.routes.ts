@@ -4,7 +4,7 @@ import {type ZodTypeProvider } from 'fastify-type-provider-zod';
 
 import { signUp } from './auth.controller.js';
 
-import { createUserSchema, createUserResponseSchema, loginUserSchema, loginUserResponseSchema } from './user.schema.js';
+import { createUserSchema, createUserResponseSchema, loginUserSchema, loginUserResponseSchema } from './auth.schema.js';
 import { loginUserHandler } from './auth.controller.js';
 
 
@@ -12,7 +12,7 @@ export function faireUnTest(a : String) {
     return a;
 }
 
-export async function userRoutes(app: FastifyInstance) {
+export async function authRoutes(app: FastifyInstance) {
   const server = app.withTypeProvider<ZodTypeProvider>()
 
   server.get('/', {
@@ -47,5 +47,5 @@ export async function userRoutes(app: FastifyInstance) {
 
   server.delete('/logout', () => {})
 
-  server.log.info('user routes registered')
+  server.log.info('auth routes registered')
 }

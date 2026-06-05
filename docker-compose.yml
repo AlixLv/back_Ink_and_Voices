@@ -1,19 +1,20 @@
-#version: "3.9" considéré comme obsolète d'après le terminal
-
 services:
   postgres:
     container_name: postgres
     image: postgres:16-alpine
     environment:
-    - POSTGRES_USER=${POSTGRES_USER}
-    - POSTGRES_PASSWORD=${POSTGRES_PW}
-    - POSTGRES_DB=${POSTGRES_DB}
-    - NODE_ENV=development
-    - ADDRESS=0.0.0.0
-    - PORT=8032
-    - DATABASE_URL=${LOCAL_DATABASE_URL} #optional (specify default database instead of $POSTGRES_DB)
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PW}
+      - POSTGRES_DB=${POSTGRES_DB}
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: always
 
   pgadmin:
@@ -24,39 +25,56 @@ services:
       - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PW}
     ports:
       - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
     restart: always
 
   dev:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        - DATABASE_URL=${LOCAL_DATABASE_URL}
+      target: dev
     ports:
       - "8032:8032"
     environment:
       - NODE_ENV=development
       - ADDRESS=0.0.0.0
       - PORT=8032
-      - DATABASE_URL=${DATABASE_URL}
       - LOCAL_DATABASE_URL=${LOCAL_DATABASE_URL}
-    volumes: # on mappe le dossier local à gauche sur le dossier distant dans le volume du container à droite
+      - JWT_SECRET=${JWT_SECRET}
+    volumes:
+      # le code local est monté dans le conteneur (hot-reload),
+      # mais on garde le node_modules construit dans l'image
       - .:/app
       - /app/node_modules
-      - /app/build # évite d'écraser le build du container
-    command: npm start
+    command: sh -c "npx prisma generate && npx prisma migrate deploy && npm run dev"
     depends_on:
-      - postgres
-    #command: npm run dev  
+      postgres:
+        condition: service_healthy
 
   prod:
     profiles:
       - prod
     build:
       context: .
+      dockerfile: Dockerfile
+      target: prod
       args:
-        - DATABASE_URL:${LOCAL_DATABASE_URL}
+        - DATABASE_URL=${DATABASE_URL}
     ports:
       - "8001:8001"
     environment:
       - NODE_ENV=production
+      - ADDRESS=0.0.0.0
+      - PORT=8001
+      - DATABASE_URL=${DATABASE_URL}
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  pgadmin_data:

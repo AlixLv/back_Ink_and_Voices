@@ -24,15 +24,17 @@ test('GET / should return status OK', async() => {
 
 // test d'intégration route signup
 describe('Test /api/auth/signup', () => { 
+    let uniqueSignupEmail: string;
     beforeEach(async() => {
+        uniqueSignupEmail = `signupuser.${Math.random().toString(36).substring(7)}@example.com`;
         await prisma.user.deleteMany({
-             where: { email: 'signupuser@example.com' }
+             where: { email: uniqueSignupEmail }
       })
     })
     it('returns successful user creation', async() => {
         await app.ready()
         const newUserData = {
-        'email': 'signupuser@example.com', 
+        'email': uniqueSignupEmail, 
         'username': 'signupuser', 
         'password': 'password123'
     }
@@ -42,22 +44,24 @@ describe('Test /api/auth/signup', () => {
             payload: newUserData
         })
         expect(response.statusCode).toBe(201);
-        expect(response.json()).toEqual( {"email": "signupuser@example.com", "username": "signupuser"});
+        expect(response.json()).toEqual( {"email": uniqueSignupEmail, "username": "signupuser"});
     })
 });
 
 
 // test d'intégration route login
 describe('Test /api/auth/login', () => { 
+    let uniqueLoginEmail: string;
     beforeEach(async() => {
+        uniqueLoginEmail = `loginuser.${Math.random().toString(36).substring(7)}@example.com`;
         await prisma.user.deleteMany({
-             where: { email: 'loginuser@example.com' }
+             where: { email: uniqueLoginEmail }
       })
     })
-    it('returns message on successful user loginn', async() => {
+    it('returns message on successful user login', async() => {
         await app.ready()
         const newUserData = {
-        'email': 'loginuser@example.com', 
+        'email': uniqueLoginEmail, 
         'username': 'loginuser', 
         'password': 'password123'
     }
@@ -70,13 +74,13 @@ describe('Test /api/auth/login', () => {
             method: 'POST', 
             url: '/api/auth/login', 
             payload: {
-                email: 'loginuser@example.com',
+                email: uniqueLoginEmail,
                 password: 'password123'
             }
         })
         const body = loginResponse.json()
         expect(loginResponse.statusCode).toBe(200);
-        expect(body.email).toBe('loginuser@example.com');
+        expect(body.email).toBe(uniqueLoginEmail);
         expect(body.username).toBe('loginuser');
         expect(body.token).toBeDefined();
     })

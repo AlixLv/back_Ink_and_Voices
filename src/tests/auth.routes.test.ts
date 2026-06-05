@@ -18,7 +18,6 @@ test('GET / should return status OK', async() => {
     });
     expect(response.statusCode).toBe(200);
     expect(response.json()).toEqual({ message: '/ route hit success' });
-    console.log("response du inject: ", response)
 });
 
 

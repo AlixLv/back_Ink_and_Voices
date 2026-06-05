@@ -23,7 +23,6 @@ test('email valide', () => {
         username: "Ada",
         password: "testpassword123"
     })
-    console.log("result.error: ", result.error?.flatten())
     expect(result.success).toBe(true)
 })
 

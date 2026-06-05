@@ -1,0 +1,65 @@
+import app from '../../../index';
+import { describe, beforeEach, beforeAll, expect, it, afterAll } from "vitest";
+import { PrismaClient } from '../../../generated/prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
+import { string } from 'zod';
+
+
+const isDev = process.env.NODE_ENV !== 'production';
+const dbUrl = isDev ? process.env.LOCAL_DATABASE_URL : process.env.DATABASE_URL;
+const adapter = new PrismaPg({ connectionString: dbUrl });
+const prisma = new PrismaClient({ adapter });
+
+beforeAll(async () => {
+    await app.ready()
+})
+
+// test d'intégration route profile
+describe('Test /api/users/profile', () => {
+    beforeEach(async() => {
+        await prisma.user.deleteMany({
+            where: { email: 'signupuser@example.com'}
+        })
+    })
+    it('returns successful user creation', async() => {
+        const newUserData = {
+            email: 'signupuser@example.com',
+            username: 'signupuser', 
+            password:'password123'
+        }
+        const response = await app.inject({
+            method: 'POST',
+            url: '/api/auth/signup',
+            payload: newUserData
+        })
+        
+        const loginResponse = await app.inject({
+            method: 'POST', 
+            url: 'api/auth/login',
+            payload: {
+                email:'signupuser@example.com',
+                password:'password123'
+            }
+        })
+        const bodyLogin = loginResponse.json();
+        const cookieHeader = loginResponse.headers['set-cookie']
+        const rawCookie = (Array.isArray(cookieHeader) ? cookieHeader[0] : cookieHeader) ?? ""
+        const token = rawCookie.split(';')[0]?.split('=').slice(1).join('=')
+        
+        const profileResponse = await app.inject({
+            method: 'GET',
+            url: 'api/users/profile',
+            headers: {cookie: 'access_token=' + token}
+        })
+        const bodyProfile = profileResponse.json();
+        expect(profileResponse.statusCode).toBe(200);
+        expect(bodyProfile.email).toBe('signupuser@example.com');
+        expect(bodyProfile.username).toBe('signupuser');
+    })
+})
+
+afterAll(async() => {
+    await prisma.user.deleteMany({
+        where: { email: 'signupuser@example.com'}
+    })
+})

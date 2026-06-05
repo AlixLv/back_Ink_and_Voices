@@ -3,7 +3,15 @@
 version: '3'
 
 tasks:
-  dev-db:
-    desc: Starts local database for dev
+  prisma-migrate:
+    desc: prisma migrate qqchose
     cmds: 
-      - docker exec back_ink_and_voices-dev-1 sh -c "npx prisma migrate dev && npx prisma db seed"
+      - docker exec back_ink_and_voices-dev-1 sh -c "npx prisma migrate dev"
+  prisma-seed:
+    desc: prisma seed qqchose
+    cmds: 
+      - docker exec back_ink_and_voices-dev-1 sh -c "npx prisma db seed"
+  run-tests:
+    desc: run the tests
+    cmds: 
+      - docker exec back_ink_and_voices-dev-1 sh -c "npm run test"

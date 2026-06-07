@@ -6,11 +6,13 @@
 import "dotenv/config";
 import { defineConfig } from "prisma/config";
 
-const isDevelopment = process.env.NODE_ENV !== "production";
-const databaseURL = isDevelopment ? process.env["LOCAL_DATABASE_URL"] : process.env["DATABASE_URL"];
+const isDev = process.env.NODE_ENV !== "production";
+const isTest = process.env.NODE_ENV === 'test';
+
+const databaseURL = isTest ? process.env.TEST_DATABASE : isDev ? process.env.LOCAL_DATABASE_URL : process.env.DATABASE_URL;
 
 if (!databaseURL) {
-  throw new Error("DATABASE_URL is not defined");
+  throw new Error("Any database has been defined")
 }
 
 export default defineConfig({

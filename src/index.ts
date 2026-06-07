@@ -11,7 +11,9 @@ import fCookie from '@fastify/cookie';
 
 // 1. Configuration de la Base de Données (Le tuyau DB)
 const isDev = process.env.NODE_ENV !== 'production';
-const dbUrl = isDev ? process.env.LOCAL_DATABASE_URL : process.env.DATABASE_URL;
+const isTest = process.env.NODE_ENV === 'test';
+
+const dbUrl = isTest ? process.env.TEST_DATABASE : isDev ? process.env.LOCAL_DATABASE_URL : process.env.DATABASE_URL;
 
 const adapter = new PrismaPg({ connectionString: dbUrl });
 const prisma = new PrismaClient({ adapter });

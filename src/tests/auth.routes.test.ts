@@ -1,5 +1,5 @@
 import app from '../index';
-import { expect, it, describe, beforeEach } from 'vitest';
+import { test, expect, it, describe, beforeEach, afterEach } from 'vitest';
 import { PrismaClient } from '../generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 
@@ -25,10 +25,10 @@ describe('check the server is working', () => {
 
 // integration test for signup route
 describe('Test /api/auth/signup', () => { 
-    beforeEach(async() => {
+    afterEach(async() => {
         await prisma.user.deleteMany({
-             where: { email: 'signupuser@example.com' }
-      })
+            where: { email: 'signupuser@example.com' }
+        })
     })
     it('returns successful user creation', async() => {
         await app.ready()
@@ -50,10 +50,10 @@ describe('Test /api/auth/signup', () => {
 
 // integration test for login route
 describe('Test /api/auth/login', () => { 
-    beforeEach(async() => {
+    afterEach(async() => {
         await prisma.user.deleteMany({
-             where: { email: 'loginuser@example.com' }
-      })
+            where: { email: 'loginuser@example.com' }
+        })
     })
     it('returns message on successful user login', async() => {
         await app.ready()

@@ -3,8 +3,8 @@ import { expect, it, describe, beforeEach } from 'vitest';
 import { PrismaClient } from '../generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 
-const isDev = process.env.NODE_ENV !== 'production';
-const dbUrl = isDev ? process.env.LOCAL_DATABASE_URL : process.env.DATABASE_URL;
+// const isDev = process.env.NODE_ENV !== 'production';
+const dbUrl = process.env.TEST_DATABASE;
 const adapter = new PrismaPg({ connectionString: dbUrl });
 const prisma = new PrismaClient({ adapter });
 

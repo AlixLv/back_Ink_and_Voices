@@ -2,6 +2,9 @@ import { expect, it, describe } from 'vitest';
 import { createUserSchema } from '../modules/auth/auth.schema'
 import 'dotenv/config'
 
+const dbUrl = process.env.TEST_DATABASE;
+console.log("Database utilisée: ", dbUrl)
+
 describe('cannot login with an invalid email', () => {
     it('returns False', () => { // quelle status d'erreur? voir avec postman
         const result = createUserSchema.safeParse({ 

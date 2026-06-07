@@ -3,14 +3,25 @@
 version: '3'
 
 tasks:
-  prisma-migrate:
-    desc: prisma migrate qqchose
+  prisma-migrate-db:
+    desc: prisma migrate on local database
     cmds: 
       - docker exec back_ink_and_voices-dev-1 sh -c "npx prisma migrate dev"
-  prisma-seed:
-    desc: prisma seed qqchose
+  prisma-seed-db:
+    desc: prisma seed on local database
     cmds: 
       - docker exec back_ink_and_voices-dev-1 sh -c "npx prisma db seed"
+
+  prisma-migrate-test:
+    desc: prisma migrate on test database
+    cmds:
+      - docker exec back_ink_and_voices-dev-1 sh -c "(LOCAL_DATABASE_URL=postgresql://terence:RatonLaveur3@postgres:5432/test_ink_and_voices npx prisma migrate deploy)"
+  prisma-seed-test:
+    desc: prisma seed on test database
+    cmds:
+      - docker exec back_ink_and_voices-dev-1 sh -c "(LOCAL_DATABASE_URL=postgresql://terence:RatonLaveur3@postgres:5432/test_ink_and_voices npx prisma db seed)"
+# il faut utiliser les variables de .env pour garder confidentiel et que ça marche pour lauriane et alix
+# il faut remettre local_database_url à la bonne valeur après ça
   run-tests:
     desc: run the tests
     cmds: 

@@ -6,7 +6,7 @@ import { getBooksResponseSchema } from './book.schema.js';
 export async function bookRoutes(app: FastifyInstance) {
   const server = app.withTypeProvider<ZodTypeProvider>();
 
-  server.get('/books', {
+  server.get('/', {
     schema: {
       response: {
         200: getBooksResponseSchema,

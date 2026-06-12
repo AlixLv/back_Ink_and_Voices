@@ -68,8 +68,6 @@ app.decorate('authenticate', async function(
   req: FastifyRequest,
   reply: FastifyReply) {
     try {
-        console.log('🍪 Cookies reçus:', req.cookies);
-        console.log('🔑 Headers reçus:', req.headers);
         await req.jwtVerify({ onlyCookie: true })
         console.log('✅ Token vérifié avec succès')
     } catch (err){

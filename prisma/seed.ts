@@ -38,15 +38,25 @@ async function main() {
 
   console.log("🪪 Users: ", { regularUser, adminUser })
 
-const novelType = await prisma.type.create({
-    data: {
+
+// je peux pas upsert parce que les champs de cette table doivent être uniques. On peut le faire avec un @unique dans le schema
+//const novelType = await prisma.type.create({
+const novelType = await prisma.type.upsert({
+  where: { type_name: 'Roman' },
+  update: {},   
+  create: {
       type_name: 'Roman',
       url_image: 'https://example.com/novel.jpg',
     },
   });
 
-  const poetryType = await prisma.type.create({
-    data: {
+
+  // upsert ne marche pas avec les string, askip. Ca doit être un input dynamique, peut-être. Voir la doc.
+  const poetryType = await prisma.type.upsert({
+  //const poetryType = await prisma.type.create({
+    where: { type_name: 'Poésie' },
+    update: {},
+    create: {
       type_name: 'Poésie',
       url_image: 'https://example.com/poetry.jpg',
     },
@@ -61,7 +71,9 @@ const novelType = await prisma.type.create({
 
   console.log('✅ Types');
 
-const racismTheme = await prisma.theme.create({
+const racismTheme = await prisma.theme.upsert({
+    where: {theme_name: 'Racisme'},
+    update: {},
     data: { theme_name: 'Racisme' },
   });
 

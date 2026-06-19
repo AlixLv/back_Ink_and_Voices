@@ -8,7 +8,9 @@ tasks:
     cmds: 
       - docker exec back_ink_and_voices-dev-1 sh -c 
         'npx prisma db seed && echo "🔶 LOCAL_DATABASE_URL seeded!" && 
-        env NODE_ENV=test npx prisma db seed && echo "🔷 TEST_DATABASE seeded!"'
+        LOCAL_DATABASE_URL=${TEST_DATABASE} npx prisma db seed && echo "🔷 TEST_DATABASE seeded!"'
+        #'npx prisma db seed && echo "🔶 LOCAL_DATABASE_URL seeded!" && 
+        #env NODE_ENV=test npx prisma db seed && echo "🔷 TEST_DATABASE seeded!"'
 
   prisma-migrate-db:
     desc: prisma migrate on local database

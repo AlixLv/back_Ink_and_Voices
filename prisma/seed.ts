@@ -40,15 +40,16 @@ async function main() {
 
 
 // je peux pas upsert parce que les champs de cette table doivent être uniques. On peut le faire avec un @unique dans le schema
-//const novelType = await prisma.type.create({
-const novelType = await prisma.type.upsert({
-  where: { type_name: 'Roman' },
-  update: {},   
-  create: {
-      type_name: 'Roman',
-      url_image: 'https://example.com/novel.jpg',
-    },
-  });
+  //const novelType = await prisma.type.create({
+  const novelType = await prisma.type.upsert({
+    where: { type_name: 'Roman' },
+      update: {},
+      create: {
+      //data: {
+        type_name: 'Roman',
+        url_image: 'https://example.com/novel.jpg',
+      },
+    });
 
 
   // upsert ne marche pas avec les string, askip. Ca doit être un input dynamique, peut-être. Voir la doc.
@@ -57,13 +58,16 @@ const novelType = await prisma.type.upsert({
     where: { type_name: 'Poésie' },
     update: {},
     create: {
+    //data: {
       type_name: 'Poésie',
       url_image: 'https://example.com/poetry.jpg',
     },
   });
 
-  const shortStoriesType = await prisma.type.create({
-    data: {
+  const shortStoriesType = await prisma.type.upsert({
+    where: { type_name: 'Recueil de nouvelles' },
+    update: {},
+    create: {
       type_name: 'Recueil de nouvelles',
       url_image: 'https://example.com/poetry.jpg',
     },
@@ -71,28 +75,49 @@ const novelType = await prisma.type.upsert({
 
   console.log('✅ Types');
 
-const racismTheme = await prisma.theme.upsert({
-    where: {theme_name: 'Racisme'},
+  const racismTheme = await prisma.theme.upsert({
+  //const racismTheme = await prisma.theme.create({
+      where: {theme_name: 'Racisme'},
+      update: {},
+      create: {
+    //data: {
+      theme_name: 'Racisme',
+    },
+    });
+
+  const feminismTheme = await prisma.theme.upsert({
+    where: {theme_name: 'Féminisme'},
     update: {},
-    data: { theme_name: 'Racisme' },
+    create: {
+      theme_name: 'Féminisme',
+    },
   });
 
-  const feminismTheme = await prisma.theme.create({
-    data: { theme_name: 'Féminisme' },
+  const adventureTheme = await prisma.theme.upsert({
+    where: {theme_name: 'Aventure'},
+    update: {},
+    create: {
+      theme_name: 'Aventure',
+    },
   });
 
-  const adventureTheme = await prisma.theme.create({
-    data: { theme_name: 'Aventure' },
-  });
-
-  const ecologyTheme = await prisma.theme.create({
-    data: { theme_name: 'Écologie'}
+  const ecologyTheme = await prisma.theme.upsert({
+    where: {theme_name: 'Écologie'},
+    update: {},
+    create: { theme_name: 'Écologie'}
   })
 
   console.log('✅ Themes');
 
-  const book1 = await prisma.book.create({
-    data: {
+  const book1 = await prisma.book.upsert({
+    where: {
+      author_title: {
+        title: 'La Licorne Noire',
+        author: 'Audre Lorde'
+      }
+    },
+    update: {},
+    create: {
       type_id: poetryType.id,
       title: 'La Licorne Noire',
       author: 'Audre Lorde',
@@ -112,8 +137,15 @@ const racismTheme = await prisma.theme.upsert({
     },
   });
 
-  const book2 = await prisma.book.create({
-    data: {
+  const book2 = await prisma.book.upsert({
+    where: {
+      author_title: {
+        title: 'Les Orageuses',
+        author: 'Marcia Burnier'
+      }
+    },
+    update: {},
+    create: {
       type_id: novelType.id,
       title: 'Les Orageuses',
       author: 'Marcia Burnier',
@@ -132,8 +164,15 @@ const racismTheme = await prisma.theme.upsert({
     },
   });
 
-  const book3 = await prisma.book.create({
-    data: {
+  const book3 = await prisma.book.upsert({
+    where: {
+      author_title: {
+        title: 'Son corps et autres célébrations',
+        author: 'Carmen Maria Machado'
+      }
+    },
+    update: {},
+    create: {
       type_id: shortStoriesType.id,
       title: 'Son corps et autres célébrations',
       author: 'Carmen Maria Machado',
@@ -152,8 +191,15 @@ const racismTheme = await prisma.theme.upsert({
     },
   });
 
-  const book4 = await prisma.book.create({
-    data: {
+  const book4 = await prisma.book.upsert({
+    where: {
+      author_title: {
+        title: 'Les Tentacules',
+        author: 'Rita Indiana',
+      },
+    },
+    update: {},
+    create: {
       type_id: novelType.id,
       title: 'Les Tentacules',
       author: 'Rita Indiana',

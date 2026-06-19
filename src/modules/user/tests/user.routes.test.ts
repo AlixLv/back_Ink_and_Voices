@@ -3,6 +3,7 @@ import { describe, beforeEach, beforeAll, expect, it, afterAll } from "vitest";
 import { PrismaClient } from '../../../generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { string } from 'zod';
+import { profile } from 'console';
 
 
 const isDev = process.env.NODE_ENV !== 'production';
@@ -59,13 +60,8 @@ describe('Test /api/users/profile', () => {
 })
 
 // test accès route profile sans cookie
-describe('Test /api/users/profile', () => {
-    beforeEach(async() => {
-        await prisma.user.deleteMany({
-            where: {email: 'notuser@example.com'}
-        })
-    })
-    it('returns error 401', async() => {
+describe('Test /api/users/profile swhit untautorized access', () => {
+    it('should return error 401 without cookie', async() => {
         const profileResponse = await app.inject({
             method: 'GET',
             url: 'api/users/profile',
@@ -76,7 +72,20 @@ describe('Test /api/users/profile', () => {
         expect(bodyProfile.message).toBe("Token invalide ou absent");
         
     })
+
+    it('should return error 401 with corrupted token', async() => {
+        const profileResponse = await app.inject({
+            method: 'GET',
+            url: 'api/users/profile',
+            headers: {cookie: 'access_token=' + 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp-QV30'}
+        })
+        const bodyProfile = profileResponse.json();
+        expect(profileResponse.statusCode).toBe(401);
+        expect(bodyProfile.message).toBe("Token invalide ou absent");
+    })
 })
+
+
 
 afterAll(async() => {
     await prisma.user.deleteMany({

@@ -14,18 +14,18 @@ beforeAll(async () => {
     await app.ready()
 })
 
-// test d'intégration route profile
+// test d'intégration route protégée profile
 describe('Test /api/users/profile', () => {
     beforeEach(async() => {
         await prisma.user.deleteMany({
-            where: { email: 'signupuser@example.com'}
+            where: { email: 'testuser@example.com'}
         })
     })
     it('returns successful user creation', async() => {
         const newUserData = {
-            email: 'signupuser@example.com',
-            username: 'signupuser', 
-            password:'password123'
+            email: 'testuser@example.com',
+            username: 'testuser', 
+            password:'testpassword123'
         }
         const response = await app.inject({
             method: 'POST',
@@ -37,8 +37,8 @@ describe('Test /api/users/profile', () => {
             method: 'POST', 
             url: 'api/auth/login',
             payload: {
-                email:'signupuser@example.com',
-                password:'password123'
+                email:'testuser@example.com',
+                password:'testpassword123'
             }
         })
         const bodyLogin = loginResponse.json();
@@ -53,13 +53,33 @@ describe('Test /api/users/profile', () => {
         })
         const bodyProfile = profileResponse.json();
         expect(profileResponse.statusCode).toBe(200);
-        expect(bodyProfile.email).toBe('signupuser@example.com');
-        expect(bodyProfile.username).toBe('signupuser');
+        expect(bodyProfile.email).toBe('testuser@example.com');
+        expect(bodyProfile.username).toBe('testuser');
+    })
+})
+
+// test accès route profile sans cookie
+describe('Test /api/users/profile', () => {
+    beforeEach(async() => {
+        await prisma.user.deleteMany({
+            where: {email: 'notuser@example.com'}
+        })
+    })
+    it('returns error 401', async() => {
+        const profileResponse = await app.inject({
+            method: 'GET',
+            url: 'api/users/profile',
+            headers: {cookie: 'access_token='}
+        })
+        const bodyProfile = profileResponse.json();
+        expect(profileResponse.statusCode).toBe(401);
+        expect(bodyProfile.message).toBe("Token invalide ou absent");
+        
     })
 })
 
 afterAll(async() => {
     await prisma.user.deleteMany({
-        where: { email: 'signupuser@example.com'}
+        where: { email: 'testuser@example.com'}
     })
 })

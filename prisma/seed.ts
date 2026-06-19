@@ -1,6 +1,7 @@
 import { PrismaClient } from '../src/generated/prisma/client';
 //import { PrismaClient } from '../generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
+import * as argon2 from 'argon2';
 import { Pool } from 'pg';
 
 const pool = new Pool({
@@ -20,7 +21,7 @@ async function main() {
     create: {
       email: 'alice@prisma.io',
       username: 'Alice',
-      password: "verysecurepassword",
+      password: await argon2.hash("verysecurepassword"),
       role: 'user'
     },
   })
@@ -30,7 +31,7 @@ async function main() {
     create: {
       email: 'bob@prisma.io',
       username: 'Bob',
-      password: "verysecurepassword",
+      password: await argon2.hash("verysecurepassword"),
       role: 'admin'
     },
   })

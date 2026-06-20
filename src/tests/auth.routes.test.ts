@@ -3,8 +3,9 @@ import { test, expect, it, describe, beforeEach, afterEach } from 'vitest';
 import { PrismaClient } from '../generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 
-// const isDev = process.env.NODE_ENV !== 'production';
+
 const dbUrl = process.env.TEST_DATABASE;
+console.log("🌸 dbURL utilisée: ", dbUrl)
 const adapter = new PrismaPg({ connectionString: dbUrl });
 const prisma = new PrismaClient({ adapter });
 

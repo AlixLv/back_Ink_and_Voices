@@ -10,12 +10,25 @@ import fCookie from '@fastify/cookie';
 
 
 // 1. Configuration de la Base de Données (Le tuyau DB)
-const isDev = process.env.NODE_ENV !== 'production';
-const isTest = process.env.NODE_ENV === 'test';
+// const isDev = process.env.NODE_ENV !== 'production';
+// const isTest = process.env.NODE_ENV === 'test';
+// Avec ça erreur 500
+//  FAIL  src/tests/auth.routes.test.ts > Test /api/auth/signup > returns successful user creation
+//  FAIL  src/tests/auth.routes.test.ts > Test /api/auth/login > returns message on successful user loginn
+// Error: SASL: SCRAM-SERVER-FIRST-MESSAGE: client password must be a string
 
-const dbUrl = isTest ? process.env.TEST_DATABASE : isDev ? process.env.LOCAL_DATABASE_URL : process.env.DATABASE_URL;
+// const dbUrl = isTest ? process.env.TEST_DATABASE : isDev ? process.env.LOCAL_DATABASE_URL : process.env.DATABASE_URL;
+const databaseUrl = process.env.LOCAL_DATABASE_URL;
+if (!databaseUrl) {
+  throw new Error("LOCAL_DATABASE_URL is not defined");
+}
+// avec ça, ça met erreur 409 au lieu de 201, Objet.is equality, pourtant on dirait que le code n'est pas le même mais que l'autre test sur assert les boens datas passe bien lui?
+//  ❯ src/tests/auth.routes.test.ts (3 tests | 1 failed) 252ms
+//    ✓ GET / should return status OK 26ms
+//      × returns successful user creation 137ms
+//      ✓ returns message on successful user loginn 87ms
 
-const adapter = new PrismaPg({ connectionString: dbUrl });
+const adapter = new PrismaPg({ connectionString: databaseUrl });
 const prisma = new PrismaClient({ adapter });
 
 // 2. Configuration du Serveur (Le tuyau Web)

@@ -1,5 +1,5 @@
 import { expect, it, describe } from 'vitest';
-import { createUserSchema } from '../modules/auth/auth.schema'
+import { createUserSchema } from '../auth.schema'
 import 'dotenv/config'
 
 const dbUrl = process.env.TEST_DATABASE;

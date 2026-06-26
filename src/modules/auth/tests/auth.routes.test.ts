@@ -1,6 +1,6 @@
-import app from '../index';
+import app from '../../../index';
 import { test, expect, it, describe, beforeEach, afterEach } from 'vitest';
-import { PrismaClient } from '../generated/prisma/client';
+import { PrismaClient } from '../../../generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 
 

@@ -1,13 +1,11 @@
 import app from '../../../index';
-import { describe, beforeEach, beforeAll, expect, it, afterAll } from "vitest";
+import { describe, beforeEach, beforeAll, expect, it, afterAll, afterEach } from "vitest";
 import { PrismaClient } from '../../../generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { string } from 'zod';
 import { profile } from 'console';
 
-
-const isDev = process.env.NODE_ENV !== 'production';
-const dbUrl = isDev ? process.env.LOCAL_DATABASE_URL : process.env.DATABASE_URL;
+const dbUrl = process.env.TEST_DATABASE;
 const adapter = new PrismaPg({ connectionString: dbUrl });
 const prisma = new PrismaClient({ adapter });
 
@@ -17,7 +15,8 @@ beforeAll(async () => {
 
 // test d'intégration route protégée profile
 describe('Test /api/users/profile', () => {
-    beforeEach(async() => {
+    afterEach(async() => {
+//    beforeEach(async() => {
         await prisma.user.deleteMany({
             where: { email: 'testuser@example.com'}
         })

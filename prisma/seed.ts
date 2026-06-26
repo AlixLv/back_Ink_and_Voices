@@ -4,9 +4,17 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import * as argon2 from 'argon2';
 import { Pool } from 'pg';
 
-const pool = new Pool({
-  connectionString: process.env.LOCAL_DATABASE_URL,
-});
+const dbUrlMap: Record<string, string | undefined> = {
+  test: process.env.TEST_DATABASE,
+  development: process.env.LOCAL_DATABASE_URL,
+  production: process.env.DATABASE_URL,
+};
+
+const dbUrl = dbUrlMap[process.env.NODE_ENV || 'development'];
+
+if (!dbUrl) throw new Error(`DATABASE_URL not configured for ${process.env.NODE_ENV}`);
+
+const pool = new Pool({ connectionString: dbUrl });
 
 const adapter = new PrismaPg(pool as any);
 

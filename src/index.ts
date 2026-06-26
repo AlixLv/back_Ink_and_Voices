@@ -10,8 +10,15 @@ import fCookie from '@fastify/cookie';
 
 
 // 1. Configuration de la Base de Données (Le tuyau DB)
-const isDev = process.env.NODE_ENV !== 'production';
-const dbUrl = isDev ? process.env.LOCAL_DATABASE_URL : process.env.DATABASE_URL;
+const dbUrlMap: Record<string, string | undefined> = {
+  test: process.env.TEST_DATABASE,
+  development: process.env.LOCAL_DATABASE_URL,
+  production: process.env.DATABASE_URL,
+};
+
+const dbUrl = dbUrlMap[process.env.NODE_ENV || 'development'];
+
+if (!dbUrl) throw new Error(`DATABASE_URL not configured for ${process.env.NODE_ENV}`);
 
 const adapter = new PrismaPg({ connectionString: dbUrl });
 const prisma = new PrismaClient({ adapter });

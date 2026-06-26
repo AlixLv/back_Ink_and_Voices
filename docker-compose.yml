@@ -10,6 +10,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
@@ -42,14 +43,18 @@ services:
       - NODE_ENV=development
       - ADDRESS=0.0.0.0
       - PORT=8032
-      - LOCAL_DATABASE_URL=${LOCAL_DATABASE_URL}
+      - DATABASE_URL=${LOCAL_DATABASE_URL}
+      - TEST_DATABASE=${TEST_DATABASE}
       - JWT_SECRET=${JWT_SECRET}
     volumes:
       # le code local est monté dans le conteneur (hot-reload),
       # mais on garde le node_modules construit dans l'image
       - .:/app
       - /app/node_modules
-    command: sh -c "npx prisma generate && npx prisma migrate deploy && npm run dev"
+    command: sh -c "npx prisma generate && 
+              (DATABASE_URL=${TEST_DATABASE} npx prisma migrate deploy) && 
+              (DATABASE_URL=${LOCAL_DATABASE_URL} npx prisma migrate deploy) && 
+              npm run dev"
     depends_on:
       postgres:
         condition: service_healthy

@@ -6,12 +6,16 @@
 import "dotenv/config";
 import { defineConfig } from "prisma/config";
 
-const isDevelopment = process.env.NODE_ENV !== "production";
-const databaseURL = isDevelopment ? process.env["LOCAL_DATABASE_URL"] : process.env["DATABASE_URL"];
 
-if (!databaseURL) {
-  throw new Error("DATABASE_URL is not defined");
-}
+const dbUrlMap: Record<string, string | undefined> = {
+  test: process.env.TEST_DATABASE,
+  development: process.env.LOCAL_DATABASE_URL,
+  production: process.env.DATABASE_URL,
+};
+
+const dbUrl = dbUrlMap[process.env.NODE_ENV || 'development'];
+
+if (!dbUrl) throw new Error(`DATABASE_URL not configured for ${process.env.NODE_ENV}`);
 
 export default defineConfig({
   schema: "prisma/schema.prisma",
@@ -20,6 +24,6 @@ export default defineConfig({
     seed: "tsx prisma/seed.ts"
  },
   datasource: {
-    url: databaseURL,
+    url: dbUrl,
   },
 });

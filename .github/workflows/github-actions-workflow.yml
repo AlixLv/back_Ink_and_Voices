@@ -22,8 +22,9 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     env:
+      NODE_ENV: test
+      TEST_DATABASE: ${{ vars.TEST_DATABASE }}
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ink_test
-      LOCAL_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ink_test
       JWT_SECRET: test-secret
     steps:
       - name: Check out repository code

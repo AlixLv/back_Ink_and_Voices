@@ -1,10 +1,11 @@
 import app from '../index';
-import { expect, it, describe, beforeEach } from 'vitest';
+import { test, expect, it, describe, beforeEach, afterEach } from 'vitest';
 import { PrismaClient } from '../generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 
-const isDev = process.env.NODE_ENV !== 'production';
-const dbUrl = isDev ? process.env.LOCAL_DATABASE_URL : process.env.DATABASE_URL;
+
+const dbUrl = process.env.TEST_DATABASE;
+console.log("🌸 dbURL utilisée: ", dbUrl)
 const adapter = new PrismaPg({ connectionString: dbUrl });
 const prisma = new PrismaClient({ adapter });
 
@@ -25,10 +26,10 @@ describe('check the server is working', () => {
 
 // integration test for signup route
 describe('Test /api/auth/signup', () => { 
-    beforeEach(async() => {
+    afterEach(async() => {
         await prisma.user.deleteMany({
-             where: { email: 'signupuser@example.com' }
-      })
+            where: { email: 'signupuser@example.com' }
+        })
     })
     it('returns successful user creation', async() => {
         await app.ready()
@@ -50,10 +51,10 @@ describe('Test /api/auth/signup', () => {
 
 // integration test for login route
 describe('Test /api/auth/login', () => { 
-    beforeEach(async() => {
+    afterEach(async() => {
         await prisma.user.deleteMany({
-             where: { email: 'loginuser@example.com' }
-      })
+            where: { email: 'loginuser@example.com' }
+        })
     })
     it('returns message on successful user login', async() => {
         await app.ready()

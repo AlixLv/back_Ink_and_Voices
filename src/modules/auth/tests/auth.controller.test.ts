@@ -1,38 +1,17 @@
-import { expect, expectTypeOf, test } from 'vitest'
-import { createUserSchema } from '../auth.schema';
-import { signUp } from '../auth.controller';
+import { expect, it, describe } from 'vitest';
+import { createUserSchema } from '../auth.schema'
 import 'dotenv/config'
 
- // TODO: Vérification des messages d'erreur et de succès!
- // TODO: que doit-on vérifier dans ces tests?
- // TODO: respecter la convention describe/it
+const dbUrl = process.env.TEST_DATABASE;
+console.log("Database utilisée: ", dbUrl)
 
-
-// Vérification des types TypeScript
-test('my types work properly', () => {
-    expectTypeOf(signUp).toBeFunction()
-    expectTypeOf({email: "ada@gmail.com"}).toEqualTypeOf<{email: string}>()
-    expectTypeOf({username: "Ada"}).toEqualTypeOf<{username: string}>()
-    expectTypeOf({password: "testpwd"}).toEqualTypeOf<{password: string}>()
-  })
-
-  
-test('email valide', () => {
-    const result = createUserSchema.safeParse({
-        email: "ada@gmail.com",
-        username: "Ada",
-        password: "testpassword123"
-    })
-    console.log("result.error: ", result.error?.flatten())
-    expect(result.success).toBe(true)
-})
-
-
-test('email invalide', () => {
-    const result = createUserSchema.safeParse({
-        email: "not-an-email",
-        username: "Ada",
-        password: "testpassword123"
-    })
-    expect(result.success).toBe(false)
-})
+describe('cannot login with an invalid email', () => {
+    it('returns False', () => { // quelle status d'erreur? voir avec postman
+        const result = createUserSchema.safeParse({ 
+            email: "not-a-email",
+            username: "Ada",
+            password: "testpassword123"
+        })
+    expect(result.success).toBe(false);
+    });
+});

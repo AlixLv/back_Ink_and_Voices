@@ -1,5 +1,5 @@
 import app from '../index';
-import { test, expect, it, describe, beforeEach } from 'vitest';
+import { expect, it, describe, beforeEach } from 'vitest';
 import { PrismaClient } from '../generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 
@@ -9,21 +9,21 @@ const adapter = new PrismaPg({ connectionString: dbUrl });
 const prisma = new PrismaClient({ adapter });
 
 
-// healthcheck
-test('GET / should return status OK', async() => {
-    await app.ready();
-    const response = await app.inject({
-        method: 'GET', 
-        url: '/api/auth/' 
-    });
+//healthcheck
+describe('check the server is working', () => { 
+    it('returns 200 OK status', async() => {
+        await app.ready();
+        const response = await app.inject({
+            method: 'GET', 
+            url: '/api/auth/' //mais ça devrait pas être la page d'acceuil? juste "/" ?
+        });
     expect(response.statusCode).toBe(200);
     expect(response.json()).toEqual({ message: '/ route hit success' });
-    console.log("response du inject: ", response)
+    });
 });
 
 
-
-// test d'intégration route signup
+// integration test for signup route
 describe('Test /api/auth/signup', () => { 
     beforeEach(async() => {
         await prisma.user.deleteMany({
@@ -48,14 +48,14 @@ describe('Test /api/auth/signup', () => {
 });
 
 
-// test d'intégration route login
+// integration test for login route
 describe('Test /api/auth/login', () => { 
     beforeEach(async() => {
         await prisma.user.deleteMany({
              where: { email: 'loginuser@example.com' }
       })
     })
-    it('returns message on successful user loginn', async() => {
+    it('returns message on successful user login', async() => {
         await app.ready()
         const newUserData = {
         'email': 'loginuser@example.com', 

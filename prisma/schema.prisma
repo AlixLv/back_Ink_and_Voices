@@ -19,7 +19,7 @@ datasource db {
 model user {
   id String @id @default(uuid())
   email String @unique
-  username String
+  username String @unique
   password String
   role role @default(user)
   book_suggestions book[] //attribut pas présent dans nos MCD et MLD. A ajouter si on fonctionne comme cela. 
@@ -36,7 +36,7 @@ enum role {
   admin
 }
 
-model book {
+model book { 
   id Int @id @default(autoincrement())
   type_id Int
   type type @relation(fields: [type_id], references: [id])
@@ -53,6 +53,8 @@ model book {
   user user @relation(fields: [user_id], references:[id])
   created_at DateTime @default(now())
   validations book_validation[]
+
+  @@unique([author, title])
 }
 
 enum status {
@@ -63,14 +65,14 @@ enum status {
 
 model type {
   id Int @id @default(autoincrement())
-  type_name String 
+  type_name String @unique
   url_image String?
   books book[]
   created_at  DateTime @default(now())
 }
 model theme {
   id Int @id @default(autoincrement())
-  theme_name String
+  theme_name String @unique
   books theme_book[]
   created_at DateTime @default(now())
 }

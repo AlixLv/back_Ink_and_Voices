@@ -25,7 +25,7 @@ export async function userRoutes(app: FastifyInstance){
         schema: {
             body: updateUserSchema,
             response: { 
-                201: userProfileResponseSchema,
+                200: userProfileResponseSchema,
             }
         }
 

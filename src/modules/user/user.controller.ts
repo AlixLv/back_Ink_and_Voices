@@ -14,7 +14,8 @@ export async function getUserLogged(
 
     return reply.code(200).send({
         email: user.email, 
-        username: user.username
+        username: user.username,
+        requiresLogin: false
     })
 }
 
@@ -24,22 +25,35 @@ export async function updateUser(
 ){
     const { email, username, password } = req.body;
         try {
-            const hashPassword = await argon2.hash(password);
-            const update_user = await req.server.prisma.user.update({
+            const dataToUdpate: {email?: string; username?: string; password?: string} = {};
+            
+            if(email) dataToUdpate.email = email;
+            if (username) dataToUdpate.username = username;
+            if (password) dataToUdpate.password = await argon2.hash(password);
+
+            const updateUser = await req.server.prisma.user.update({
                 where: {id: req.user.id},
-                data: {
-                    email,
-                    username,
-                    password: hashPassword,
-                }
+                data: dataToUdpate
             }) 
-            return reply.code(201).send(update_user)  
+
+            if(password){
+                reply.clearCookie('access token', {path: '/'});
+                return reply.code(200).send({
+                    email: updateUser.email,
+                    username: updateUser.username,
+                    requiresLogin: true
+                })
+            } else {
+                return reply.code(200).send({
+                    email: updateUser.email,
+                    username: updateUser.username,
+                    requiresLogin: false
+                })
+            } 
         } catch (e) {
             return reply.code(500).send({
                 message: "🚨 an error occured",
                 error: e instanceof Error ? e.message: String(e)
             } )
         }
-
-
 }

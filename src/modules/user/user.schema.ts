@@ -2,9 +2,9 @@ import {z} from 'zod';
 
 // data/input du user 
 export const updateUserSchema = z.object({
-    email: z.string(),
-    username: z.string(),
-    password: z.string().min(8),
+    email: z.email().optional(),
+    username: z.string().optional(),
+    password: z.string().min(8).optional(),
 })
 
 export type UpdateUserProfile = z.infer<typeof updateUserSchema>
@@ -13,4 +13,5 @@ export type UpdateUserProfile = z.infer<typeof updateUserSchema>
 export const userProfileResponseSchema = z.object({
     email: z.email(),
     username: z.string(),
+    requiresLogin: z.boolean(),
 })

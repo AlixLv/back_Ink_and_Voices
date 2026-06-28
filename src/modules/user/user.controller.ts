@@ -1,6 +1,6 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import * as argon2 from 'argon2';
-import { updateUserSchema } from "./user.schema";
+import type { UpdateUserProfile } from "./user.schema";
 
 
 export async function getUserLogged(
@@ -19,7 +19,7 @@ export async function getUserLogged(
 }
 
 export async function updateUser(
-    req: FastifyRequest <{Body: updateUserSchema}>,
+    req: FastifyRequest <{Body: UpdateUserProfile}>,
     reply: FastifyReply
 ){
     const { email, username, password } = req.body;

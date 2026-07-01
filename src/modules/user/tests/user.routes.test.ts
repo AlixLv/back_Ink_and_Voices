@@ -2,6 +2,7 @@ import app from '../../../index';
 import { describe, beforeEach, beforeAll, expect, it, afterAll, afterEach } from "vitest";
 import { PrismaClient } from '../../../generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
+import argon2 from 'argon2';
 import { string } from 'zod';
 import { profile } from 'console';
 
@@ -15,17 +16,25 @@ beforeAll(async () => {
 
 // test d'intégration route protégée profile
 describe('Test /api/users/profile', () => {
+    beforeEach(async() => {
+        // nettoyage de la base de données avant le test
+        await prisma.user.deleteMany({
+            where: { email: 'testuser@example.com', }
+        })
+    });
+        
     afterEach(async() => {
-//    beforeEach(async() => {
         await prisma.user.deleteMany({
             where: { email: 'testuser@example.com'}
         })
-    })
+    });
+
     it('returns successful user creation', async() => {
+        const hashedPassword = await argon2.hash('testpassword123');
         const newUserData = {
             email: 'testuser@example.com',
             username: 'testuser', 
-            password:'testpassword123'
+            password: hashedPassword
         }
         const response = await app.inject({
             method: 'POST',
@@ -38,7 +47,7 @@ describe('Test /api/users/profile', () => {
             url: 'api/auth/login',
             payload: {
                 email:'testuser@example.com',
-                password:'testpassword123'
+                password: hashedPassword
             }
         })
         const bodyLogin = loginResponse.json();
@@ -59,7 +68,7 @@ describe('Test /api/users/profile', () => {
 })
 
 // test accès route profile sans cookie
-describe('Test /api/users/profile swhit untautorized access', () => {
+describe('Test /api/users/profile with untautorized access', () => {
     it('should return error 401 without cookie', async() => {
         const profileResponse = await app.inject({
             method: 'GET',
@@ -84,10 +93,110 @@ describe('Test /api/users/profile swhit untautorized access', () => {
     })
 })
 
+// Tests unitaires
+// test rejet d'un changement de pwd contenant moins de 8 caractères
+// test d'update avec un champ vide
+
+// tests d'intégration
+// test data retournées après update du profil avec et sans modification pwd
+describe('Test /api/users/update-profile without password changed', () => {
+    beforeEach(async() => {
+        // nettoyage de la base de données avant le test
+        await prisma.user.deleteMany({
+            where: { email: { in : ['testprofile@example.com', 'testnewprofile@example.com']}}
+        })
+        
+        // creation du user de test
+        const hashedPwd = await argon2.hash('testpwd123dd');
+        await prisma.user.create({
+            data: {
+                email: 'testprofile@example.com',
+                username: 'testprofile', 
+                password: hashedPwd
+            }
+        })
+    });
+
+    // nettoyage de la base après le test
+    afterEach(async() => {
+        await prisma.user.deleteMany({
+            where: { email: { in : ['testprofile@example.com', 'testnewprofile@example.com']}}
+        })
+    })
+
+    it('returns successful user updated profile without password changed', async() => {  
+        const hashedPwd = await argon2.hash('testpwd123dd');
+
+        const loginResponse = await app.inject({
+            method: 'POST', 
+            url: 'api/auth/login',
+            payload: {
+                email:'testprofile@example.com',
+                password: hashedPwd
+            }
+        })
+
+        const cookieHeader = loginResponse.headers['set-cookie']
+        const rawCookie = (Array.isArray(cookieHeader) ? cookieHeader[0] : cookieHeader) ?? ""
+        const token = rawCookie.split(';')[0]?.split('=').slice(1).join('=')
+        
+        const profileResponse = await app.inject({
+            method: 'GET',
+            url: 'api/users/profile',
+            headers: {cookie: 'access_token=' + token}
+        })
+
+        const updatedUserData =  {
+            email: 'testnewprofile@example.com',
+            username: 'testnewprofile', 
+        }
+
+        const res = await app.inject({
+            method: 'POST',
+            url: 'api/users/update-profile',
+            headers: {cookie: 'access_token=' + token},
+            payload: updatedUserData
+        })
+        console.log("🍎 res body: ", res.body);
+
+        const dbUser = await prisma.user.findUnique({
+            where: {email: 'testnewprofile@example.com'}
+        });
+        console.log("🔥 dbUser: ", dbUser)
+
+        const bodyUpdatedProfile = res.json();
+        expect(res.statusCode).toBe(200);
+        expect(bodyUpdatedProfile.email).toBe('testnewprofile@example.com');
+        expect(bodyUpdatedProfile.username).toBe('testnewprofile');
+        expect(bodyUpdatedProfile.requiresLogin).toBe(false);
+
+        const cookieResHeader = res.headers['set-cookie']
+        console.log("🍋 cookie in header:", cookieResHeader)
+        const resCookie = (Array.isArray(cookieResHeader) ? cookieResHeader[0] : cookieResHeader) ?? ""
+        console.log("🍀 Raw cookie header ", resCookie);
+        const resToken = resCookie.split(';')[0]?.split('=').slice(1).join('=')
+
+        expect(resToken).toBe(token);
+    })
+})
+
+// test tentative d'accès à /update-profile sans token
+// test de vérification du clear Cookie après update du profil avec password modifié
+
+
 
 
 afterAll(async() => {
     await prisma.user.deleteMany({
-        where: { email: 'testuser@example.com'}
+        where: {
+            email: {
+                in: [
+                    'testuser@example.com',
+                    'testprofile@example.com',
+                    'testnewprofile@example.com'
+                ]
+            }
+        }
     })
-})
+    await app.close();
+});

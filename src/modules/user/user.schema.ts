@@ -2,7 +2,7 @@ import {z} from 'zod';
 
 // data/input du user 
 export const updateUserSchema = z.object({
-    email: z.email().optional(),
+    email: z.email().optional(), 
     username: z.string().optional(),
     password: z.string().min(8).optional(),
 })

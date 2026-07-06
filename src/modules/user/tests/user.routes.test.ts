@@ -8,10 +8,23 @@ import { profile } from 'console';
 
 const dbUrl = process.env.TEST_DATABASE;
 const adapter = new PrismaPg({ connectionString: dbUrl });
+console.log("🌈 dbUrl: ", dbUrl)
 const prisma = new PrismaClient({ adapter });
 
 beforeAll(async () => {
     await app.ready()
+
+    await prisma.user.deleteMany({
+        where: {
+            email: {
+                in: [
+                    'testuser@example.com',
+                    'testprofile@example.com',
+                    'testnewprofile@example.com'
+                ]
+            }
+        }
+    })
 })
 
 // test d'intégration route protégée profile
@@ -30,11 +43,11 @@ describe('Test /api/users/profile', () => {
     });
 
     it('returns successful user creation', async() => {
-        const hashedPassword = await argon2.hash('testpassword123');
+        const plainPassword = 'testpassword123';
         const newUserData = {
             email: 'testuser@example.com',
             username: 'testuser', 
-            password: hashedPassword
+            password: plainPassword
         }
         const response = await app.inject({
             method: 'POST',
@@ -47,7 +60,7 @@ describe('Test /api/users/profile', () => {
             url: 'api/auth/login',
             payload: {
                 email:'testuser@example.com',
-                password: hashedPassword
+                password: plainPassword
             }
         })
         const bodyLogin = loginResponse.json();
@@ -107,7 +120,8 @@ describe('Test /api/users/update-profile without password changed', () => {
         })
         
         // creation du user de test
-        const hashedPwd = await argon2.hash('testpwd123dd');
+        const plainPassword = 'testpwd123dd';
+        const hashedPwd = await argon2.hash(plainPassword);
         await prisma.user.create({
             data: {
                 email: 'testprofile@example.com',
@@ -124,15 +138,15 @@ describe('Test /api/users/update-profile without password changed', () => {
         })
     })
 
-    it('returns successful user updated profile without password changed', async() => {  
-        const hashedPwd = await argon2.hash('testpwd123dd');
+    it('should return successful user updated profile without password changed', async() => {  
+        const plainPassword = 'testpwd123dd';
 
         const loginResponse = await app.inject({
             method: 'POST', 
             url: 'api/auth/login',
             payload: {
                 email:'testprofile@example.com',
-                password: hashedPwd
+                password: plainPassword
             }
         })
 
@@ -170,13 +184,15 @@ describe('Test /api/users/update-profile without password changed', () => {
         expect(bodyUpdatedProfile.username).toBe('testnewprofile');
         expect(bodyUpdatedProfile.requiresLogin).toBe(false);
 
-        const cookieResHeader = res.headers['set-cookie']
-        console.log("🍋 cookie in header:", cookieResHeader)
-        const resCookie = (Array.isArray(cookieResHeader) ? cookieResHeader[0] : cookieResHeader) ?? ""
-        console.log("🍀 Raw cookie header ", resCookie);
-        const resToken = resCookie.split(';')[0]?.split('=').slice(1).join('=')
+        // cookie n'est pas renvoyé par le backend si pas de modification de password. 
+        // Objectif métier: vérifier que user reste connectée, il faut vérifier le statusCode
+        const profileAfterUpdate = await app.inject({
+            method: 'GET',
+            url: 'api/users/profile',
+            headers: {cookie: 'access_token=' + token}
+        })
 
-        expect(resToken).toBe(token);
+        expect(profileAfterUpdate.statusCode).toBe(200);
     })
 })
 

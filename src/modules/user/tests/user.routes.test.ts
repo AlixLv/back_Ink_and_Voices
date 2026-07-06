@@ -8,7 +8,6 @@ import { profile } from 'console';
 
 const dbUrl = process.env.TEST_DATABASE;
 const adapter = new PrismaPg({ connectionString: dbUrl });
-console.log("🌈 dbUrl: ", dbUrl)
 const prisma = new PrismaClient({ adapter });
 
 beforeAll(async () => {
@@ -106,9 +105,6 @@ describe('Test /api/users/profile with untautorized access', () => {
     })
 })
 
-// Tests unitaires
-// test rejet d'un changement de pwd contenant moins de 8 caractères
-// test d'update avec un champ vide
 
 // tests d'intégration
 // test data retournées après update du profil sans modification pwd
@@ -171,12 +167,10 @@ describe('Test /api/users/update-profile without password changed', () => {
             headers: {cookie: 'access_token=' + token},
             payload: updatedUserData
         })
-        console.log("🍎 res body: ", res.body);
 
         const dbUser = await prisma.user.findUnique({
             where: {email: 'testnewprofile@example.com'}
         });
-        console.log("🔥 dbUser: ", dbUser)
 
         const bodyUpdatedProfile = res.json();
         expect(res.statusCode).toBe(200);
@@ -261,13 +255,10 @@ describe('Test /api/users/update-profile with password changed', () => {
             headers: {cookie: 'access_token=' + newToken},
             payload: updateUserData
         })
-        console.log("🍏 res body: ", responseUpdatedPwd.body);
 
         const dbUpdatedUser = await prisma.user.findUnique({
             where: {email: 'testpwd@example.com'}
         });
-
-        console.log("👑 dbUpdatedUser: ", dbUpdatedUser)
         
         const bodyNewPassword = responseUpdatedPwd.json();
         expect(responseUpdatedPwd.statusCode).toBe(200);
@@ -285,6 +276,19 @@ describe('Test /api/users/update-profile with password changed', () => {
 
 
 // test tentative d'accès à /update-profile sans token
+describe('Test /api/users/update-profile without access token', () => {
+    it('should return access error 401', async() => {
+        const updateUserInfo = await app.inject({
+            method: 'POST',
+            url: 'api/users/update-profile',
+            payload: {
+                username: 'Toto'
+            }
+        })
+        expect(updateUserInfo.statusCode).toBe(401);
+        expect(updateUserInfo.statusMessage).toBe('Unauthorized');
+    });
+});
 
 
 

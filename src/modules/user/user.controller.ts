@@ -37,7 +37,7 @@ export async function updateUser(
             }) 
 
             if(password){
-                reply.clearCookie('access token', {path: '/'});
+                reply.clearCookie('access_token', {path: '/'});
                 return reply.code(200).send({
                     email: updateUser.email,
                     username: updateUser.username,

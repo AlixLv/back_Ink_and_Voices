@@ -1,6 +1,6 @@
-import { expect, expectTypeOf, describe, it, vi, beforeEach } from 'vitest'
+import { expect, expectTypeOf, describe, it, vi, beforeEach, beforeAll } from 'vitest'
 import { bookSchema, getBooksResponseSchema } from './book.schema'
-import { getRecentBooksHandler } from './book.controller'
+import { getRecentBooksHandler, getBookHandler } from './book.controller'
 import 'dotenv/config'
 
 describe('book schema', () => {
@@ -137,3 +137,66 @@ describe('getRecentBooksHandler', () => {
     expect(mockReply.send).toHaveBeenCalledWith({ message: 'Failed to fetch books' })
   })
 })
+
+describe('getBookHandler', () => {
+  const mockBook = {
+      id: 1,
+      title: 'La Licorne Noire',
+      author: 'Audre Lorde',
+      short_description: ' Sur fond de mélancolie, toujours empreinte de peur et de fureur, sa parole s’élève, furieuse, impatiente, multiple, créatrice et inspirante.',
+      reference_link: null,
+      created_at: new Date(),
+      type: { id: 1, type_name: 'Poésie', url_image: null },
+      themes: [{ theme: { id: 1, theme_name: 'Féminisme' } }],
+    }
+
+  const mockFindUnique = vi.fn().mockResolvedValue(mockBook)
+
+  const mockReq = {
+    params: { id: 1 },
+    server: {
+      prisma: {
+        book: {
+          findUnique: mockFindUnique,
+        },
+      },
+    },
+    logs: {error: vi.fn()},
+  } as any
+
+  const mockReply = {
+    code: vi.fn().mockReturnThis(),
+    send: vi.fn().mockReturnThis(),
+  } as any
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('should return 200 with formatted book', async () => {
+    await getBookHandler(mockReq, mockReply)
+    console.log("🧲mockReply: ", mockReply)
+
+    expect(mockReply.code).toHaveBeenCalledWith(200)
+    expect(mockReply.send).toHaveBeenCalledWith(
+      {
+        id: mockBook.id,
+      title: mockBook.title,
+      author: mockBook.author,
+      short_description: mockBook.short_description,
+      reference_link: mockBook.reference_link,
+      created_at: mockBook.created_at,
+      type: mockBook.type,
+      themes: mockBook.themes,
+      });
+  });
+
+  it('returns 500 when Prisma throws', async () => {
+    mockFindUnique.mockRejectedValueOnce(new Error('DB error'))
+
+    await getBookHandler(mockReq, mockReply)
+
+    expect(mockReply.code).toHaveBeenCalledWith(500)
+    expect(mockReply.send).toHaveBeenCalledWith({ message: 'Failed to fetch the book' })
+  })
+});

@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { number, z } from 'zod';
 
 export const bookSchema = z.object({
   id: z.number(),
@@ -22,4 +22,11 @@ export const bookSchema = z.object({
 
 export const getBooksResponseSchema = z.array(bookSchema);
 
+export const getSingleBook = z.object(bookSchema);
+
 export type Book = z.infer<typeof bookSchema>;
+
+// validation du type du paramètre id comme nombre
+export const getBookParamsSchema = z.object({
+  id: z.coerce.number()
+})

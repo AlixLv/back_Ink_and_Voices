@@ -1,6 +1,6 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { Prisma } from '../../generated/prisma/client';
-import type { getBookParamsSchema, getSingleBook} from './book.schema';
+import type { getBookParamsSchema } from './book.schema';
 import { z } from 'zod';
 
 type BookWithRelations = Prisma.bookGetPayload<{
@@ -99,7 +99,6 @@ export async function getBookHandler(
         type: book.type,
         themes: book.themes.map((t: { theme: {id: number; theme_name: string}}) => t.theme),
       };
-      console.log("📗 book: ", result)
       return reply.code(200).send(result);
 
     } catch(error){

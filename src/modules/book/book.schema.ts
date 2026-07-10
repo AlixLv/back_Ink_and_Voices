@@ -22,7 +22,7 @@ export const bookSchema = z.object({
 
 export const getBooksResponseSchema = z.array(bookSchema);
 
-export const getSingleBook = z.object(bookSchema);
+export const singleBookResponseSchema = bookSchema;
 
 export type Book = z.infer<typeof bookSchema>;
 

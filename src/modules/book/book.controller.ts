@@ -79,8 +79,10 @@ export async function getBookHandler(
         where: { id },
         include: {
           type: true,
-          themes: true,
-        }
+          themes: {
+            include: { theme: true },
+          },
+        },
       });
 
       if (!book){

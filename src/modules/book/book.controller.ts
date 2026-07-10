@@ -95,7 +95,7 @@ export async function getBookHandler(
         reference_link: book.reference_link,
         created_at: book.created_at,
         type: book.type,
-        themes: book.themes,
+        themes: book.themes.map((t: { theme: {id: number; theme_name: string}}) => t.theme),
       };
       console.log("📗 book: ", result)
       return reply.code(200).send(result);

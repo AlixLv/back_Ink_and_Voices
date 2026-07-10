@@ -183,7 +183,6 @@ describe('getBookHandler', () => {
 
   it('should return 200 with formatted book', async () => {
     await getBookHandler(mockReq, mockReply)
-    console.log("🧲 mockReply: ", mockReply)
 
     expect(mockReply.code).toHaveBeenCalledWith(200)
     expect(mockReply.send).toHaveBeenCalledWith(
@@ -195,7 +194,7 @@ describe('getBookHandler', () => {
       reference_link: mockBook.reference_link,
       created_at: mockBook.created_at,
       type: mockBook.type,
-      themes: mockBook.themes,
+      themes: [{ id: 1, theme_name: 'Féminisme' }]
       });
   });
 

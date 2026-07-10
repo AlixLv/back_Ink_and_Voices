@@ -4,6 +4,10 @@ import { getRecentBooksHandler, getBookHandler } from './book.controller'
 import 'dotenv/config'
 
 describe('book schema', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
   const validBook = {
     id: 1,
     title: 'Les La Licorne Noire',
@@ -70,6 +74,10 @@ describe('book types', () => {
 
 
 describe('getRecentBooksHandler', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
   const mockBooks = [
     {
       id: 1,
@@ -139,6 +147,10 @@ describe('getRecentBooksHandler', () => {
 })
 
 describe('getBookHandler', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
   const mockBook = {
       id: 1,
       title: 'La Licorne Noire',
@@ -161,7 +173,7 @@ describe('getBookHandler', () => {
         },
       },
     },
-    logs: {error: vi.fn()},
+    log: {error: vi.fn()},
   } as any
 
   const mockReply = {
@@ -169,13 +181,9 @@ describe('getBookHandler', () => {
     send: vi.fn().mockReturnThis(),
   } as any
 
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
-
   it('should return 200 with formatted book', async () => {
     await getBookHandler(mockReq, mockReply)
-    console.log("🧲mockReply: ", mockReply)
+    console.log("🧲 mockReply: ", mockReply)
 
     expect(mockReply.code).toHaveBeenCalledWith(200)
     expect(mockReply.send).toHaveBeenCalledWith(

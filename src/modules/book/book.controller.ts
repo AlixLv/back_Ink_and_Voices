@@ -69,7 +69,7 @@ export async function getRecentBooksHandler(
 }
 
 export async function getBookHandler(
-  req: FastifyRequest<{Params: id }>,
+  req: FastifyRequest<{Params: z.infer<typeof getBookParamsSchema>}>,
   reply: FastifyReply
   ){
     const { id } = req.params;

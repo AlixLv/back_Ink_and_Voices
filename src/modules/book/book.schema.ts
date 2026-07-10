@@ -26,7 +26,7 @@ export const getSingleBook = z.object(bookSchema);
 
 export type Book = z.infer<typeof bookSchema>;
 
-// validation du type du paramètre id comme nombre
+// validation du type du paramètre id
 export const getBookParamsSchema = z.object({
   id: z.coerce.number()
 })

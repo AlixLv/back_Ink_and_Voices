@@ -14,8 +14,6 @@ export async function bookRoutes(app: FastifyInstance) {
     },
   }, getRecentBooksHandler);
 
-  server.log.info('book routes registered');
-
   server.get('/book/:id', {
     schema: {
       params: getBookParamsSchema,
@@ -24,5 +22,7 @@ export async function bookRoutes(app: FastifyInstance) {
       },
     }
   }, getBookHandler)
+
+  server.log.info('book routes registered');
 }
 

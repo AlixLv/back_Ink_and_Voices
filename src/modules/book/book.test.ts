@@ -109,9 +109,9 @@ describe('getRecentBooksHandler', () => {
     send: vi.fn().mockReturnThis(),
   } as any
 
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
+  // beforeEach(() => {
+  //   vi.clearAllMocks()
+  // })
 
   it('returns 200 with formatted books', async () => {
     await getRecentBooksHandler(mockReq, mockReply)
@@ -188,13 +188,13 @@ describe('getBookHandler', () => {
     expect(mockReply.send).toHaveBeenCalledWith(
       {
         id: mockBook.id,
-      title: mockBook.title,
-      author: mockBook.author,
-      short_description: mockBook.short_description,
-      reference_link: mockBook.reference_link,
-      created_at: mockBook.created_at,
-      type: mockBook.type,
-      themes: [{ id: 1, theme_name: 'Féminisme' }]
+        title: mockBook.title,
+        author: mockBook.author,
+        short_description: mockBook.short_description,
+        reference_link: mockBook.reference_link,
+        created_at: mockBook.created_at,
+        type: mockBook.type,
+        themes: [{ id: 1, theme_name: 'Féminisme' }]
       });
   });
 
@@ -206,4 +206,52 @@ describe('getBookHandler', () => {
     expect(mockReply.code).toHaveBeenCalledWith(500)
     expect(mockReply.send).toHaveBeenCalledWith({ message: 'Failed to fetch the book' })
   })
+
+  it('returns 404 when book does not exist', async () => {
+    mockFindUnique.mockResolvedValueOnce(null);
+
+    await getBookHandler(mockReq, mockReply);
+
+    expect(mockFindUnique).toHaveBeenCalledWith({
+      where: { id: mockReq.params.id },
+      include: { type: true, themes: { include: { theme: true } } },
+    });
+
+    expect(mockReply.code).toHaveBeenCalledWith(404);
+    expect(mockReply.send).toHaveBeenCalledWith({
+      message: "The book you are looking for isn't available",
+    });
+  });
+
+  it('returns 200 with an empty themes array when book has no themes', async () => {
+    mockFindUnique.mockResolvedValueOnce({ ...mockBook, themes: [] });
+
+    await getBookHandler(mockReq, mockReply);
+
+    expect(mockReply.code).toHaveBeenCalledWith(200);
+    expect(mockReply.send).toHaveBeenCalledWith(
+       expect.objectContaining({ themes: [] })
+    );
+  });
+
+  it('returns 200 with all themes mapped when book has multiple themes', async () => {
+    mockFindUnique.mockResolvedValueOnce({
+      ...mockBook,
+      themes: [
+        { theme: { id: 1, theme_name: 'Féminisme' } },
+        { theme: { id: 2, theme_name: 'Résistance' } },
+      ],
+    });
+
+    await getBookHandler(mockReq, mockReply);
+
+    expect(mockReply.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        themes: [
+          { id: 1, theme_name: 'Féminisme' },
+          { id: 2, theme_name: 'Résistance' },
+        ],
+      })
+    );
+  });
 });

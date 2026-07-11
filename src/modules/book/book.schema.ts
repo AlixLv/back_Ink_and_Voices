@@ -5,6 +5,9 @@ export const bookSchema = z.object({
   title: z.string(),
   author: z.string(),
   short_description: z.string(),
+  publishing_house: z.string(),
+  publication_year: z.string().nullable(),
+  resume: z.string(),
   reference_link: z.string().nullable(),
   created_at: z.date(),
   type: z.object({

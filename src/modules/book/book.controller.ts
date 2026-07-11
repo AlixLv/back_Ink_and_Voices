@@ -81,8 +81,8 @@ export async function getBookHandler(
           type: true,
           themes: {
             include: { theme: true },
+            },
           },
-        },
       });
 
       if (!book){
@@ -93,6 +93,9 @@ export async function getBookHandler(
         id: book.id,
         title: book.title,
         author: book.author,
+        resume: book.resume,
+        publishing_house: book.publishing_house,
+        publication_year: book.publication_year,
         short_description: book.short_description,
         reference_link: book.reference_link,
         created_at: book.created_at,

@@ -1,7 +1,8 @@
 import { expect, expectTypeOf, describe, it, vi, beforeEach, beforeAll } from 'vitest'
-import { bookSchema, getBooksResponseSchema } from './book.schema'
+import { bookSchema, getBooksResponseSchema, bookDetailSchema } from './book.schema'
 import { getRecentBooksHandler, getBookHandler } from './book.controller'
 import 'dotenv/config'
+import { mock } from 'node:test'
 
 describe('book schema', () => {
   beforeEach(() => {
@@ -151,6 +152,7 @@ describe('getBookHandler', () => {
     vi.clearAllMocks()
   })
 
+  // forme brute du book retournée par Prisma, avec la join-table theme_book
   const mockBook = {
       id: 1,
       title: 'La Licorne Noire',
@@ -159,7 +161,13 @@ describe('getBookHandler', () => {
       reference_link: null,
       created_at: new Date(),
       type: { id: 1, type_name: 'Poésie', url_image: null },
-      themes: [{ theme: { id: 1, theme_name: 'Féminisme' } }],
+      themes: [
+      {theme: { id: 1, theme_name: 'Racisme' }},
+      {theme: { id: 2, theme_name: 'Féminisme' }},
+      ],
+      publishing_house: 'L\'Arche',
+      publication_year: '2021',
+      resume:'Le recueil La Licorne noire de la poétesse et militante Audre Lorde occupe au sein de ses écrits poétiques une place fondamentale. Ces poèmes d’amour évoquent l’apogée d’une sensualité et l’épanouissement d’une sexualité affranchie des normes sociales, prenant sa prodigieuse vigueur dans les luttes contre toutes les formes de discriminations.'
     }
 
   const mockFindUnique = vi.fn().mockResolvedValue(mockBook)
@@ -185,6 +193,7 @@ describe('getBookHandler', () => {
     await getBookHandler(mockReq, mockReply)
 
     expect(mockReply.code).toHaveBeenCalledWith(200)
+    // book formatté par getBookHandler pour themes
     expect(mockReply.send).toHaveBeenCalledWith(
       {
         id: mockBook.id,
@@ -194,9 +203,22 @@ describe('getBookHandler', () => {
         reference_link: mockBook.reference_link,
         created_at: mockBook.created_at,
         type: mockBook.type,
-        themes: [{ id: 1, theme_name: 'Féminisme' }]
-      });
+        themes: [
+          { id: 1, theme_name: 'Racisme' },
+          { id: 2, theme_name: 'Féminisme' },
+        ],
+        publishing_house: mockBook.publishing_house,
+        publication_year: mockBook.publication_year,
+        resume: mockBook.resume
+      });      
   });
+
+  it('validates a correct detailed book object', async() => {
+    await getBookHandler(mockReq, mockReply)
+    const sentPayload = mockReply.send.mock.calls[0][0]
+    const result = bookDetailSchema.safeParse(sentPayload)
+    expect(result.success).toBe(true)
+  })
 
   it('returns 500 when Prisma throws', async () => {
     mockFindUnique.mockRejectedValueOnce(new Error('DB error'))

@@ -1,6 +1,6 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { Prisma } from '../../generated/prisma/client';
-import type { getBookParamsSchema } from './book.schema';
+import type { getBookParamsSchema, bookDetailSchema } from './book.schema';
 import { z } from 'zod';
 
 type BookWithRelations = Prisma.bookGetPayload<{
@@ -93,10 +93,10 @@ export async function getBookHandler(
         id: book.id,
         title: book.title,
         author: book.author,
-        resume: book.resume,
+        short_description: book.short_description,
         publishing_house: book.publishing_house,
         publication_year: book.publication_year,
-        short_description: book.short_description,
+        resume: book.resume,
         reference_link: book.reference_link,
         created_at: book.created_at,
         type: book.type,

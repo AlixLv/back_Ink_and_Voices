@@ -3,6 +3,7 @@ import type { CreateUserInput, LoginUserInput } from './auth.schema.js';
 import * as argon2 from 'argon2';
 import fCookie from '@fastify/cookie';
 import { is } from 'zod/v4/locales';
+import { UserAlreadyExistsError, InvalidCredentialsError } from './auth.errors.js';
 
 
 export async function signUp(
@@ -10,30 +11,27 @@ export async function signUp(
     reply: FastifyReply
 ){
     const { email, username, password } = req.body;
+
     const isUser = await req.server.prisma.user.findUnique({
         where: {
             email: email,
         },
-    })
+    });
+
     if (isUser) {
-        return reply.code(409).send({
-            message: 'A user already exists with this email.',
-        })
+        throw new UserAlreadyExistsError(email);
+        }
+
+    const hashPassword = await argon2.hash(password);
+    const user = await req.server.prisma.user.create({
+        data: {
+            email,
+            username,
+            password: hashPassword,
+        }
+    });
+    return reply.code(201).send(user)
     }
-    try {
-        const hashPassword = await argon2.hash(password);
-        const user = await req.server.prisma.user.create({
-            data: {
-                email,
-                username,
-                password: hashPassword,
-            }
-        })
-        return reply.code(201).send(user)
-    } catch (e){
-        return reply.code(500).send(e)
-    }
-}
 
 // Le cookie access_token est httpOnly : le front ne peut pas le supprimer
 // lui-même, c'est donc au backend d'y mettre fin. Sans ça, "se déconnecter"
@@ -58,13 +56,30 @@ export async function loginUserHandler(
     reply: FastifyReply
 ){
     const { email, password } = req.body;
+<<<<<<< HEAD
     const user = await req.server.prisma.user.findUnique({ 
+=======
+    const user = await req.server.prisma.user.findUnique({  
+>>>>>>> ba1b4e6 (chore: add setErroHandler in index.ts + create file ApiError with global errors in it + create file auth.errors.ts with class specific to auth process)
       where: {
         email: email,
     },
     })
     if (!user) {
-        return reply.code(404).send({ message: "ce user n'existe pas en db"});
+        throw new InvalidCredentialsError();
+    } 
+    const hashPassword = user.password;
+
+    if (await argon2.verify(hashPassword, password)) {
+        const token = req.server.jwt.sign({ id: user.id });
+        reply.setCookie('access_token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production', // dev
+            sameSite: 'strict',
+            maxAge: 14 * 24 * 60 * 60, // 14 jours en secondes
+            path: '/'
+        })
+        return reply.code(200).send({ email: user.email, username: user.username, token: token });
     } else {
         try {
             const hashPassword = user.password;
@@ -86,5 +101,7 @@ export async function loginUserHandler(
         } catch(e){
             return reply.code(500).send(e);
         }
+        // throw new InvalidCredentialsError();
     }
+
 }

@@ -14,7 +14,7 @@ beforeAll(async () => {
 })
 
 // test d'intégration route protégée profile
-describe('Test /api/users/profile', () => {
+describe('Test /api/users/me', () => {
     afterEach(async() => {
 //    beforeEach(async() => {
         await prisma.user.deleteMany({
@@ -48,7 +48,7 @@ describe('Test /api/users/profile', () => {
         
         const profileResponse = await app.inject({
             method: 'GET',
-            url: 'api/users/profile',
+            url: 'api/users/me',
             headers: {cookie: 'access_token=' + token}
         })
         const bodyProfile = profileResponse.json();
@@ -59,11 +59,11 @@ describe('Test /api/users/profile', () => {
 })
 
 // test accès route profile sans cookie
-describe('Test /api/users/profile swhit untautorized access', () => {
+describe('Test /api/users/me swhit untautorized access', () => {
     it('should return error 401 without cookie', async() => {
         const profileResponse = await app.inject({
             method: 'GET',
-            url: 'api/users/profile',
+            url: 'api/users/me',
             headers: {cookie: 'access_token='}
         })
         const bodyProfile = profileResponse.json();
@@ -75,7 +75,7 @@ describe('Test /api/users/profile swhit untautorized access', () => {
     it('should return error 401 with corrupted token', async() => {
         const profileResponse = await app.inject({
             method: 'GET',
-            url: 'api/users/profile',
+            url: 'api/users/me',
             headers: {cookie: 'access_token=' + 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp-QV30'}
         })
         const bodyProfile = profileResponse.json();

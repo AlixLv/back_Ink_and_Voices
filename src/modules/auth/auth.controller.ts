@@ -35,6 +35,24 @@ export async function signUp(
     }
 }
 
+// Le cookie access_token est httpOnly : le front ne peut pas le supprimer
+// lui-même, c'est donc au backend d'y mettre fin. Sans ça, "se déconnecter"
+// ne fait que vider l'affichage pendant que la session reste ouverte ici.
+// Les options doivent correspondre à celles du setCookie du login, sinon le
+// navigateur ne reconnaît pas le cookie à supprimer.
+export async function logoutHandler(
+    _req: FastifyRequest,
+    reply: FastifyReply
+){
+    reply.clearCookie('access_token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        path: '/'
+    });
+    return reply.code(200).send({ message: 'Déconnexion réussie' });
+}
+
 // pour l'instant, on vérifie s'il y a un user avec cet email. Si c'est le cas, on revoie un message "user récupéré" avec email et pw de la requête
 export async function loginUserHandler(
     req: FastifyRequest<{Body: LoginUserInput}>,
@@ -60,7 +78,9 @@ export async function loginUserHandler(
                     maxAge: 14 * 24 * 60 * 60, // 14 jours en secondes
                     path: '/'
                 })
-                return reply.code(200).send({ email: user.email, username: user.username, token: token });
+                // Le token n'est PAS renvoyé dans le body : il ne voyage que
+                // dans le cookie httpOnly ci-dessus, hors de portée de JS.
+                return reply.code(200).send({ email: user.email, username: user.username });
             } else {
                 return reply.code(404).send({message: "email ou mot de passe incorrect"})
             }

@@ -4,8 +4,8 @@ import {type ZodTypeProvider } from 'fastify-type-provider-zod';
 
 import { signUp } from './auth.controller.js';
 
-import { createUserSchema, createUserResponseSchema, loginUserSchema, loginUserResponseSchema } from './auth.schema.js';
-import { loginUserHandler } from './auth.controller.js';
+import { createUserSchema, createUserResponseSchema, loginUserSchema, loginUserResponseSchema, logoutResponseSchema } from './auth.schema.js';
+import { loginUserHandler, logoutHandler } from './auth.controller.js';
 
 
 export function faireUnTest(a : String) {
@@ -45,7 +45,13 @@ export async function authRoutes(app: FastifyInstance) {
   }, loginUserHandler);
 
 
-  server.delete('/logout', () => {})
+  server.delete('/logout', {
+    schema: {
+      response: {
+        200: logoutResponseSchema,
+      }
+    }
+  }, logoutHandler)
 
   server.log.info('auth routes registered')
 }

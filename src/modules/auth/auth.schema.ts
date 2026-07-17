@@ -23,8 +23,15 @@ export const loginUserSchema = z.object({
 
 export type LoginUserInput = z.infer<typeof loginUserSchema>
 
+// Pas de `token` ici : il part uniquement dans le cookie httpOnly.
+// Le renvoyer dans le body permettrait au front de le copier en localStorage,
+// où le moindre script de la page pourrait le lire — ce qui annulerait
+// exactement la protection que le httpOnly nous apporte.
 export const loginUserResponseSchema = z.object({
     email: z.email(),
     username: z.string(),
-    token: z.string()
+})
+
+export const logoutResponseSchema = z.object({
+    message: z.string(),
 })

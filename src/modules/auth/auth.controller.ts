@@ -53,7 +53,6 @@ export async function logoutHandler(
     return reply.code(200).send({ message: 'Déconnexion réussie' });
 }
 
-
 export async function loginUserHandler(
     req: FastifyRequest<{Body: LoginUserInput}>,
     reply: FastifyReply

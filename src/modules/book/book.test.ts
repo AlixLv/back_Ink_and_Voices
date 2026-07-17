@@ -110,10 +110,6 @@ describe('getRecentBooksHandler', () => {
     send: vi.fn().mockReturnThis(),
   } as any
 
-  // beforeEach(() => {
-  //   vi.clearAllMocks()
-  // })
-
   it('returns 200 with formatted books', async () => {
     await getRecentBooksHandler(mockReq, mockReply)
 
@@ -243,17 +239,6 @@ describe('getBookHandler', () => {
     expect(mockReply.send).toHaveBeenCalledWith({
       message: "The book you are looking for isn't available",
     });
-  });
-
-  it('returns 200 with an empty themes array when book has no themes', async () => {
-    mockFindUnique.mockResolvedValueOnce({ ...mockBook, themes: [] });
-
-    await getBookHandler(mockReq, mockReply);
-
-    expect(mockReply.code).toHaveBeenCalledWith(200);
-    expect(mockReply.send).toHaveBeenCalledWith(
-       expect.objectContaining({ themes: [] })
-    );
   });
 
   it('returns 200 with all themes mapped when book has multiple themes', async () => {

@@ -68,17 +68,19 @@ export async function loginUserHandler(
     if (!user) {
         throw new InvalidCredentialsError();
     } 
+
     const hashPassword = user.password;
 
     if (await argon2.verify(hashPassword, password)) {
         const token = req.server.jwt.sign({ id: user.id });
         reply.setCookie('access_token', token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production', // dev
+            secure: process.env.NODE_ENV === 'production', 
             sameSite: 'strict',
-            maxAge: 14 * 24 * 60 * 60, // 14 jours en secondes
+            maxAge: 14 * 24 * 60 * 60, 
             path: '/'
         })
+<<<<<<< HEAD
         return reply.code(200).send({ email: user.email, username: user.username, token: token });
     } else {
         try {
@@ -102,6 +104,15 @@ export async function loginUserHandler(
             return reply.code(500).send(e);
         }
         // throw new InvalidCredentialsError();
+=======
+        // Le token n'est PAS renvoyé dans le body : il ne voyage que
+        // dans le cookie httpOnly ci-dessus, hors de portée de JS.
+        return reply.code(200).send({ email: user.email, username: user.username });
+    } 
+    else {
+        throw new InvalidCredentialsError();
+>>>>>>> e0f3fb2 (chore: improve error management with ApiError class in loginUserHandler and signUp)
     }
-
 }
+
+

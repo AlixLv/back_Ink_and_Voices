@@ -84,6 +84,7 @@ app.setErrorHandler((error, request, reply) => {
 
   if(error instanceof ApiError) {
     return reply.status(error.statusCode).send({
+      // sérialisation de l'objet JS en texte JSON
       error: error.code ?? error.name,
       message: error.message,
     });

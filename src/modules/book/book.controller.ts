@@ -2,6 +2,8 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { Prisma } from '../../generated/prisma/client';
 import type { getBookParamsSchema, bookDetailSchema } from './book.schema';
 import { z } from 'zod';
+import type { Book } from './book.schema';
+import { BookNotFoundError } from './book.error';
 
 type BookWithRelations = Prisma.bookGetPayload<{
   select: {
@@ -54,8 +56,7 @@ export async function getRecentBooksHandler(
         },
       },
     });
-
-
+    
     const formatted = books.map((book: BookWithRelations) => ({
       ...book,
       themes: book.themes.map((t: { theme: { id: number; theme_name: string } }) => t.theme),

@@ -133,10 +133,10 @@ describe('getRecentBooksHandler', () => {
     )
   })
 
-  it('returns 409 when Prisma throws', async () => {
-    mockFindMany.mockRejectedValueOnce(new Error('DB error'))
+it('propagates the error when Prisma rejects', async () => {
+  mockFindMany.mockRejectedValueOnce(new Error('DB connection lost'))
 
-    await getRecentBooksHandler(mockReq, mockReply)
+  await expect(getRecentBooksHandler(mockReq, mockReply)).rejects.toThrow('DB connection lost')
 
     expect(mockReply.code).toHaveBeenCalledWith(409)
     expect(mockReply.send).toHaveBeenCalledWith({ message: 'Failed to fetch books' })

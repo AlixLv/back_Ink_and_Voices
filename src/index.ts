@@ -98,7 +98,7 @@ app.setErrorHandler((error, request, reply) => {
   }
 
   if(error instanceof Prisma.PrismaClientKnownRequestError){
-    return reply.status(409).send({
+    return reply.status(500).send({
       error: 'DATABASE_ERROR',
       message: 'A database error occurred',
     });

@@ -53,13 +53,12 @@ export async function logoutHandler(
     return reply.code(200).send({ message: 'Déconnexion réussie' });
 }
 
-// pour l'instant, on vérifie s'il y a un user avec cet email. Si c'est le cas, on revoie un message "user récupéré" avec email et pw de la requête
 export async function loginUserHandler(
     req: FastifyRequest<{Body: LoginUserInput}>,
     reply: FastifyReply
 ){
     const { email, password } = req.body;
-    const user = await req.server.prisma.user.findUnique({  //prisma recherche dans la table user
+    const user = await req.server.prisma.user.findUnique({ 
       where: {
         email: email,
     },
@@ -73,16 +72,16 @@ export async function loginUserHandler(
                 const token = req.server.jwt.sign({ id: user.id });
                 reply.setCookie('access_token', token, {
                     httpOnly: true,
-                    secure: process.env.NODE_ENV === 'production', // dev
+                    secure: process.env.NODE_ENV === 'production', 
                     sameSite: 'strict',
-                    maxAge: 14 * 24 * 60 * 60, // 14 jours en secondes
+                    maxAge: 14 * 24 * 60 * 60, 
                     path: '/'
                 })
                 // Le token n'est PAS renvoyé dans le body : il ne voyage que
                 // dans le cookie httpOnly ci-dessus, hors de portée de JS.
                 return reply.code(200).send({ email: user.email, username: user.username });
             } else {
-                return reply.code(404).send({message: "email ou mot de passe incorrect"})
+                return reply.code(401).send({message: "email ou mot de passe incorrect"})
             }
         } catch(e){
             return reply.code(500).send(e);

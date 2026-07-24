@@ -1,6 +1,7 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { Prisma } from '../../generated/prisma/client';
-import type { Book } from './book.schema';
+import type { getBookParamsSchema, bookDetailSchema } from './book.schema';
+import { z } from 'zod';
 
 type BookWithRelations = Prisma.bookGetPayload<{
   select: {
@@ -65,4 +66,47 @@ export async function getRecentBooksHandler(
     req.log.error(e);
     return reply.code(500).send({ message: 'Failed to fetch books' });
   }
+}
+
+export async function getBookHandler(
+  req: FastifyRequest<{Params: z.infer<typeof getBookParamsSchema>}>,
+  reply: FastifyReply
+  ){
+    const { id } = req.params;
+
+    try{
+      const book = await req.server.prisma.book.findUnique({
+        where: { id },
+        include: {
+          type: true,
+          themes: {
+            include: { theme: true },
+            },
+          },
+      });
+
+      if (!book){
+        return reply.code(404).send({message: "The book you are looking for isn't available"});
+      }
+  
+      const result = {
+        id: book.id,
+        title: book.title,
+        author: book.author,
+        short_description: book.short_description,
+        publishing_house: book.publishing_house,
+        publication_year: book.publication_year,
+        resume: book.resume,
+        reference_link: book.reference_link,
+        created_at: book.created_at,
+        type: book.type,
+        themes: book.themes.map((t: { theme: {id: number; theme_name: string}}) => t.theme),
+      };
+      return reply.code(200).send(result);
+
+    } catch(error){
+      req.log.error(error);
+      return reply.code(500).send({ message: 'Failed to fetch the book' });
+    }
+
 }

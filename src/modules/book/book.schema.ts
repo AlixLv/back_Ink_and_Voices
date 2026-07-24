@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { number, z } from 'zod';
 
 export const bookSchema = z.object({
   id: z.number(),
@@ -23,3 +23,17 @@ export const bookSchema = z.object({
 export const getBooksResponseSchema = z.array(bookSchema);
 
 export type Book = z.infer<typeof bookSchema>;
+
+// validation du type du paramètre id
+export const getBookParamsSchema = z.object({
+  id: z.coerce.number()
+})
+
+// detailed book view
+export const bookDetailSchema = bookSchema.extend({
+  publishing_house: z.string(),
+  publication_year: z.string().nullable(),
+  resume: z.string().nullable(),
+});
+
+export const singleBookResponseSchema = bookDetailSchema;

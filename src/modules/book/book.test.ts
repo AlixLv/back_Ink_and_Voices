@@ -1,9 +1,14 @@
-import { expect, expectTypeOf, describe, it, vi, beforeEach } from 'vitest'
-import { bookSchema, getBooksResponseSchema } from './book.schema'
-import { getRecentBooksHandler } from './book.controller'
+import { expect, expectTypeOf, describe, it, vi, beforeEach, beforeAll } from 'vitest'
+import { bookSchema, getBooksResponseSchema, bookDetailSchema } from './book.schema'
+import { getRecentBooksHandler, getBookHandler } from './book.controller'
 import 'dotenv/config'
+import { mock } from 'node:test'
 
 describe('book schema', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
   const validBook = {
     id: 1,
     title: 'Les La Licorne Noire',
@@ -70,6 +75,10 @@ describe('book types', () => {
 
 
 describe('getRecentBooksHandler', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
   const mockBooks = [
     {
       id: 1,
@@ -100,10 +109,6 @@ describe('getRecentBooksHandler', () => {
     code: vi.fn().mockReturnThis(),
     send: vi.fn().mockReturnThis(),
   } as any
-
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
 
   it('returns 200 with formatted books', async () => {
     await getRecentBooksHandler(mockReq, mockReply)
@@ -137,3 +142,123 @@ describe('getRecentBooksHandler', () => {
     expect(mockReply.send).toHaveBeenCalledWith({ message: 'Failed to fetch books' })
   })
 })
+
+describe('getBookHandler', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  // forme brute du book retournée par Prisma, avec la join-table theme_book
+  const mockBook = {
+      id: 1,
+      title: 'La Licorne Noire',
+      author: 'Audre Lorde',
+      short_description: ' Sur fond de mélancolie, toujours empreinte de peur et de fureur, sa parole s’élève, furieuse, impatiente, multiple, créatrice et inspirante.',
+      reference_link: null,
+      created_at: new Date(),
+      type: { id: 1, type_name: 'Poésie', url_image: null },
+      themes: [
+      {theme: { id: 1, theme_name: 'Racisme' }},
+      {theme: { id: 2, theme_name: 'Féminisme' }},
+      ],
+      publishing_house: 'L\'Arche',
+      publication_year: '2021',
+      resume:'Le recueil La Licorne noire de la poétesse et militante Audre Lorde occupe au sein de ses écrits poétiques une place fondamentale. Ces poèmes d’amour évoquent l’apogée d’une sensualité et l’épanouissement d’une sexualité affranchie des normes sociales, prenant sa prodigieuse vigueur dans les luttes contre toutes les formes de discriminations.'
+    }
+
+  const mockFindUnique = vi.fn().mockResolvedValue(mockBook)
+
+  const mockReq = {
+    params: { id: 1 },
+    server: {
+      prisma: {
+        book: {
+          findUnique: mockFindUnique,
+        },
+      },
+    },
+    log: {error: vi.fn()},
+  } as any
+
+  const mockReply = {
+    code: vi.fn().mockReturnThis(),
+    send: vi.fn().mockReturnThis(),
+  } as any
+
+  it('should return 200 with formatted book', async () => {
+    await getBookHandler(mockReq, mockReply)
+
+    expect(mockReply.code).toHaveBeenCalledWith(200)
+    // book formatté par getBookHandler pour themes
+    expect(mockReply.send).toHaveBeenCalledWith(
+      {
+        id: mockBook.id,
+        title: mockBook.title,
+        author: mockBook.author,
+        short_description: mockBook.short_description,
+        reference_link: mockBook.reference_link,
+        created_at: mockBook.created_at,
+        type: mockBook.type,
+        themes: [
+          { id: 1, theme_name: 'Racisme' },
+          { id: 2, theme_name: 'Féminisme' },
+        ],
+        publishing_house: mockBook.publishing_house,
+        publication_year: mockBook.publication_year,
+        resume: mockBook.resume
+      });      
+  });
+
+  it('validates a correct detailed book object', async() => {
+    await getBookHandler(mockReq, mockReply)
+    const sentPayload = mockReply.send.mock.calls[0][0]
+    const result = bookDetailSchema.safeParse(sentPayload)
+    expect(result.success).toBe(true)
+  })
+
+  it('returns 500 when Prisma throws', async () => {
+    mockFindUnique.mockRejectedValueOnce(new Error('DB error'))
+
+    await getBookHandler(mockReq, mockReply)
+
+    expect(mockReply.code).toHaveBeenCalledWith(500)
+    expect(mockReply.send).toHaveBeenCalledWith({ message: 'Failed to fetch the book' })
+  })
+
+  it('returns 404 when book does not exist', async () => {
+    mockFindUnique.mockResolvedValueOnce(null);
+
+    await getBookHandler(mockReq, mockReply);
+
+    expect(mockFindUnique).toHaveBeenCalledWith({
+      where: { id: mockReq.params.id },
+      include: { type: true, themes: { include: { theme: true } } },
+    });
+
+    expect(mockReply.code).toHaveBeenCalledWith(404);
+    expect(mockReply.send).toHaveBeenCalledWith({
+      message: "The book you are looking for isn't available",
+    });
+  });
+
+  it('returns 200 with all themes mapped when book has multiple themes', async () => {
+    mockFindUnique.mockResolvedValueOnce({
+      ...mockBook,
+      themes: [
+        { theme: { id: 1, theme_name: 'Féminisme' } },
+        { theme: { id: 2, theme_name: 'Résistance' } },
+      ],
+    });
+
+    await getBookHandler(mockReq, mockReply);
+
+    expect(mockReply.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        themes: [
+          { id: 1, theme_name: 'Féminisme' },
+          { id: 2, theme_name: 'Résistance' },
+        ],
+      })
+    );
+  });
+});

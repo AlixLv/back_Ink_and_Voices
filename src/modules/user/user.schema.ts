@@ -11,6 +11,7 @@ export type UpdateUserProfile = z.infer<typeof updateUserSchema>
 
 // reponse envoyée au front
 export const userProfileResponseSchema = z.object({
+    id: z.string(),
     email: z.email(),
     username: z.string(),
 })

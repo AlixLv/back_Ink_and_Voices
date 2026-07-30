@@ -107,7 +107,7 @@ app.setErrorHandler((error, request, reply) => {
   // fallback pour ne pas exposer les erreurs côté serveur
   return reply.status(500).send({
     error: 'INTERNAL_SERVER_ERROR',
-    message: 'Something went wrong',
+    message: 'Internal server error',
   })
 })
 

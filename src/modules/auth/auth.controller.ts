@@ -1,8 +1,6 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { CreateUserInput, LoginUserInput } from './auth.schema.js';
 import * as argon2 from 'argon2';
-import fCookie from '@fastify/cookie';
-import { is } from 'zod/v4/locales';
 import { UserAlreadyExistsError, InvalidCredentialsError } from './auth.errors.js';
 
 

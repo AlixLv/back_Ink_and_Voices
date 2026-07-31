@@ -112,27 +112,36 @@ app.setErrorHandler((error, request, reply) => {
     message: 'Internal server error',
   })
 })
-await app.register(fastifySwagger, {
-  openapi: {
-    info: {
-      title: 'Ink&Voices API',
-      version: '1.0.0'
-    },
-    servers: [
-      {
-        url: 'http://localhost:8032',
-        description: 'development server'
-      }
-    ],
-  },
-  // Le swagger s'attend à recevoir du JSON schema brut.
-  // on utilise les schémas Zod, il faut donc les transformer en JSON
-  transform: jsonSchemaTransform
-});
 
-await app.register(fastifySwaggerUi, {
-  routePrefix: '/documentation'
-});
+// swagger pour la documentation
+if (process.env.NODE_ENV !== 'production'){
+  await app.register(fastifySwagger, {
+    openapi: {
+      info: {
+        title: 'Ink&Voices API',
+        version: '1.0.0'
+      },
+      servers: [
+        {
+          url: 'http://localhost:8032',
+          description: 'development server'
+        }
+      ],
+      tags: [
+        { name: 'auth', description: 'Authentication related endpoints'},
+        { name: 'user', description: 'Users related endpoints'},
+        { name: 'book', description: 'Books related endpoints'}
+      ]
+    },
+    // Le swagger s'attend à recevoir du JSON schema brut.
+    // on utilise les schémas Zod, il faut donc les transformer en JSON
+    transform: jsonSchemaTransform
+  });
+
+  await app.register(fastifySwaggerUi, {
+    routePrefix: '/documentation'
+  });
+}
 
 // routes
 app.register(authRoutes, {prefix: 'api/auth'})

@@ -1,6 +1,6 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { Prisma } from '../../generated/prisma/client';
-import type { getBookParamsSchema, bookDetailSchema } from './book.schema';
+import type { getBookParamsSchema } from './book.schema';
 import { z } from 'zod';
 import { BookNotFoundError, BookFetchError } from './book.error';
 

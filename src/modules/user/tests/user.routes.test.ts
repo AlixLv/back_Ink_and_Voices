@@ -1,9 +1,8 @@
 import app from '../../../index';
-import { describe, beforeEach, beforeAll, expect, it, afterAll, afterEach } from "vitest";
+import { describe, beforeAll, expect, it, afterAll, afterEach } from "vitest";
 import { PrismaClient } from '../../../generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
-import { string } from 'zod';
-import { profile } from 'console';
+
 
 const dbUrl = process.env.TEST_DATABASE;
 const adapter = new PrismaPg({ connectionString: dbUrl });

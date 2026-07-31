@@ -1,9 +1,8 @@
-import { expect, expectTypeOf, describe, it, vi, beforeEach, beforeAll } from 'vitest';
+import { expect, expectTypeOf, describe, it, vi, beforeEach } from 'vitest';
 import { bookSchema, getBooksResponseSchema, bookDetailSchema } from './book.schema';
 import { getRecentBooksHandler, getBookHandler } from './book.controller';
 import { BookFetchError } from './book.error';
 import 'dotenv/config';
-import { mock } from 'node:test'
 
 describe('book schema', () => {
   beforeEach(() => {

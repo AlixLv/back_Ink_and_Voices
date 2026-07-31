@@ -1,7 +1,7 @@
 import { expect, it, describe, vi, beforeEach } from 'vitest';
 import * as argon2 from 'argon2';
 import { signUp, loginUserHandler } from '../auth.controller';
-import { createUserSchema, loginUserSchema } from '../auth.schema';
+import { createUserSchema } from '../auth.schema';
 import { UserAlreadyExistsError, InvalidCredentialsError } from '../auth.errors';
 import 'dotenv/config'
 

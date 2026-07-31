@@ -8,7 +8,7 @@ import { createUserSchema, createUserResponseSchema, loginUserSchema, loginUserR
 import { loginUserHandler, logoutHandler } from './auth.controller.js';
 
 
-export function faireUnTest(a : String) {
+export function faireUnTest(a : string) {
     return a;
 }
 

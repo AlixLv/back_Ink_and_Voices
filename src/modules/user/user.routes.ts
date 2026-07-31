@@ -19,8 +19,10 @@ export async function userRoutes(app: FastifyInstance){
     server.get('/me', {
         preHandler: [app.authenticate],
         schema: {
+            description: 'Connected user checked endpoint',
+            tags: ['user'],
             response:{
-                200: userProfileResponseSchema,
+                200: userProfileResponseSchema.describe('Successful response'),
             }
         }
 
@@ -28,9 +30,11 @@ export async function userRoutes(app: FastifyInstance){
 
     server.post('/update-profile', {
         schema: {
+            description: 'update profile endpoint',
+            tags: ['user'],
             body: updateUserSchema,
             response: { 
-                201: userProfileResponseSchema,
+                201: userProfileResponseSchema.describe('Successful updated profile response'),
             }
         }
 

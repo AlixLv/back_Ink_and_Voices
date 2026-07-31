@@ -1,6 +1,6 @@
 import Fastify, { fastify, type FastifyReply, type FastifyRequest } from 'fastify';
 import cors from "@fastify/cors";
-import { PrismaClient } from './generated/prisma/client.js';
+import { PrismaClient, Prisma } from './generated/prisma/client.js';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { authRoutes } from './modules/auth/auth.routes.js';
 import { userRoutes } from './modules/user/user.routes.js';
@@ -8,6 +8,8 @@ import { bookRoutes } from './modules/book/book.route.js';
 import { serializerCompiler, validatorCompiler, type ZodTypeProvider } from 'fastify-type-provider-zod';
 import fastifyJwt from '@fastify/jwt';
 import fCookie from '@fastify/cookie';
+import { ApiError } from './errors/ApiError.js';
+import { ZodError } from 'zod';
 
 
 // 1. Configuration de la Base de Données (Le tuyau DB)
@@ -75,6 +77,38 @@ app.decorate('authenticate', async function(
         console.log('❌ Erreur JWT:', err);
         reply.code(401).send({message: "Token invalide ou absent"})
   }
+})
+
+app.setErrorHandler((error, request, reply) => {
+  request.log.error(error);
+
+  if(error instanceof ApiError) {
+    return reply.status(error.statusCode).send({
+      // sérialisation de l'objet JS en texte JSON
+      error: error.code ?? error.name,
+      message: error.message,
+    });
+  }
+
+  if(error instanceof ZodError){
+    return reply.status(400).send({
+      error: 'DATA_VALIDATION_ERROR',
+      message: error.issues.map((i) => i.message).join(','),
+    });
+  }
+
+  if(error instanceof Prisma.PrismaClientKnownRequestError){
+    return reply.status(500).send({
+      error: 'DATABASE_ERROR',
+      message: 'A database error occurred',
+    });
+  }
+
+  // fallback pour ne pas exposer les erreurs côté serveur
+  return reply.status(500).send({
+    error: 'INTERNAL_SERVER_ERROR',
+    message: 'Internal server error',
+  })
 })
 
 // routes

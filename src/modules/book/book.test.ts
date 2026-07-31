@@ -1,7 +1,8 @@
-import { expect, expectTypeOf, describe, it, vi, beforeEach, beforeAll } from 'vitest'
-import { bookSchema, getBooksResponseSchema, bookDetailSchema } from './book.schema'
-import { getRecentBooksHandler, getBookHandler } from './book.controller'
-import 'dotenv/config'
+import { expect, expectTypeOf, describe, it, vi, beforeEach, beforeAll } from 'vitest';
+import { bookSchema, getBooksResponseSchema, bookDetailSchema } from './book.schema';
+import { getRecentBooksHandler, getBookHandler } from './book.controller';
+import { BookFetchError } from './book.error';
+import 'dotenv/config';
 import { mock } from 'node:test'
 
 describe('book schema', () => {
@@ -122,6 +123,12 @@ describe('getRecentBooksHandler', () => {
     ])
   })
 
+  it('throws BookFetchError when Prisma rejects', async () => {
+    mockFindMany.mockRejectedValueOnce(new Error('DB connection lost'))
+
+    await expect(getRecentBooksHandler(mockReq, mockReply)).rejects.toThrow(BookFetchError)
+  })
+
   it('queries only validated books ordered by created_at desc', async () => {
     await getRecentBooksHandler(mockReq, mockReply)
 
@@ -132,16 +139,9 @@ describe('getRecentBooksHandler', () => {
       })
     )
   })
-
-  it('returns 500 when Prisma throws', async () => {
-    mockFindMany.mockRejectedValueOnce(new Error('DB error'))
-
-    await getRecentBooksHandler(mockReq, mockReply)
-
-    expect(mockReply.code).toHaveBeenCalledWith(500)
-    expect(mockReply.send).toHaveBeenCalledWith({ message: 'Failed to fetch books' })
-  })
 })
+
+ 
 
 describe('getBookHandler', () => {
   beforeEach(() => {
@@ -216,28 +216,20 @@ describe('getBookHandler', () => {
     expect(result.success).toBe(true)
   })
 
-  it('returns 500 when Prisma throws', async () => {
+  it('propagates the raw error when Prisma throws', async () => {
     mockFindUnique.mockRejectedValueOnce(new Error('DB error'))
 
-    await getBookHandler(mockReq, mockReply)
-
-    expect(mockReply.code).toHaveBeenCalledWith(500)
-    expect(mockReply.send).toHaveBeenCalledWith({ message: 'Failed to fetch the book' })
+    await expect(getBookHandler(mockReq, mockReply)).rejects.toThrow('DB error')
   })
 
-  it('returns 404 when book does not exist', async () => {
+  it('throws BookNotFoundError message when book does not exist', async () => {
     mockFindUnique.mockResolvedValueOnce(null);
 
-    await getBookHandler(mockReq, mockReply);
+    await expect(getBookHandler(mockReq, mockReply)).rejects.toThrow('Aucun livre trouvé.');
 
     expect(mockFindUnique).toHaveBeenCalledWith({
       where: { id: mockReq.params.id },
       include: { type: true, themes: { include: { theme: true } } },
-    });
-
-    expect(mockReply.code).toHaveBeenCalledWith(404);
-    expect(mockReply.send).toHaveBeenCalledWith({
-      message: "The book you are looking for isn't available",
     });
   });
 

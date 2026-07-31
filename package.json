@@ -9,7 +9,9 @@
     "dev": "tsx watch src/index.ts",
     "test": "vitest",
     "test:run": "vitest run",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "prisma": {
     "seed": "npx tsx prisma/seed.ts"

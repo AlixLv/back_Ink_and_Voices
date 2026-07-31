@@ -36,6 +36,8 @@ jobs:
           cache: npm
       - name: Installe les dépendances
         run: npm ci
+      - name: Vérifie le linting
+        run: npm run lint
       - name: Génère le client Prisma
         run: npx prisma generate
       - name: Applique les migrations

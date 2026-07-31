@@ -15,7 +15,6 @@ beforeAll(async () => {
 // test d'intégration route protégée profile
 describe('Test /api/users/me', () => {
     afterEach(async() => {
-//    beforeEach(async() => {
         await prisma.user.deleteMany({
             where: { email: 'testuser@example.com'}
         })
@@ -40,7 +39,7 @@ describe('Test /api/users/me', () => {
                 password:'testpassword123'
             }
         })
-        const bodyLogin = loginResponse.json();
+       
         const cookieHeader = loginResponse.headers['set-cookie']
         const rawCookie = (Array.isArray(cookieHeader) ? cookieHeader[0] : cookieHeader) ?? ""
         const token = rawCookie.split(';')[0]?.split('=').slice(1).join('=')

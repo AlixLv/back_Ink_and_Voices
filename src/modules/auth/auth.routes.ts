@@ -17,6 +17,8 @@ export async function authRoutes(app: FastifyInstance) {
 
   server.get('/', {
     schema: {
+      description: 'homepage endpoint',
+      tags: ['auth', 'code'],
       response:{
         200: z.object({message: z.string()})
       } 
@@ -27,6 +29,8 @@ export async function authRoutes(app: FastifyInstance) {
 
   server.post('/signup', {
     schema: {
+      description: 'signup endpoint',
+      tags: ['auth', 'signup'],
       body: createUserSchema,
       response: {
         201: createUserResponseSchema,

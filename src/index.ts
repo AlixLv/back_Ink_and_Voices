@@ -118,6 +118,12 @@ await app.register(fastifySwagger, {
       title: 'Ink&Voices API',
       version: '1.0.0'
     },
+    servers: [
+      {
+        url: 'http://localhost:8032',
+        description: 'development server'
+      }
+    ],
   },
   // Le swagger s'attend à recevoir du JSON schema brut.
   // on utilise les schémas Zod, il faut donc les transformer en JSON

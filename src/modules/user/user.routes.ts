@@ -20,7 +20,7 @@ export async function userRoutes(app: FastifyInstance){
 
     }, getUserLogged)
 
-    server.post('/update-profile', {
+    server.put('/update-profile', {
         preHandler: [app.authenticate],
         schema: {
             body: updateUserSchema,

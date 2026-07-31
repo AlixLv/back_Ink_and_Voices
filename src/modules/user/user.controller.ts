@@ -10,8 +10,11 @@ export async function getUserLogged(
         return reply.code(404).send({message: "user non trouvé"})
     }
 
+    // id renvoyé ici (contrairement au login) car cette route sert justement
+    // à dire "voici qui tu es" : le front s'en sert pour construire /profile/:id.
     return reply.code(200).send({
-        email: user.email, 
+        id: user.id,
+        email: user.email,
         username: user.username
     })
 }

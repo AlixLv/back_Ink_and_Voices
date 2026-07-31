@@ -53,6 +53,7 @@ describe('Test /api/users/me', () => {
         })
         const bodyProfile = profileResponse.json();
         expect(profileResponse.statusCode).toBe(200);
+        expect(bodyProfile.id).toEqual(expect.any(String));
         expect(bodyProfile.email).toBe('testuser@example.com');
         expect(bodyProfile.username).toBe('testuser');
     })

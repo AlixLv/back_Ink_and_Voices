@@ -9,8 +9,10 @@ export const updateUserSchema = z.object({
 
 export type UpdateUserProfile = z.infer<typeof updateUserSchema>
 
-// reponse envoyée au front
+// reponse envoyée au front pour GET /me. Contrairement à la réponse du login,
+// celle-ci inclut l'id : c'est la route qui fait foi pour "qui est connecté".
 export const userProfileResponseSchema = z.object({
+    id: z.string(),
     email: z.email(),
     username: z.string(),
 })

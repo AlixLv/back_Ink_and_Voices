@@ -2,9 +2,7 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { Prisma } from '../../generated/prisma/client';
 import type { getBookParamsSchema, bookDetailSchema } from './book.schema';
 import { z } from 'zod';
-import type { Book } from './book.schema';
 import { BookNotFoundError, BookFetchError } from './book.error';
-import { format } from 'path';
 
 type BookWithRelations = Prisma.bookGetPayload<{
   select: {

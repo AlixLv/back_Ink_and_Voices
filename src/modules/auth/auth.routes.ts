@@ -17,8 +17,10 @@ export async function authRoutes(app: FastifyInstance) {
 
   server.get('/', {
     schema: {
+      description: 'homepage endpoint',
+      tags: ['auth'],
       response:{
-        200: z.object({message: z.string()})
+        200: z.object({message: z.string()}).describe('Default response')
       } 
     }
   } , async (req, reply) => {
@@ -27,9 +29,11 @@ export async function authRoutes(app: FastifyInstance) {
 
   server.post('/signup', {
     schema: {
+      description: 'signup endpoint',
+      tags: ['auth'],
       body: createUserSchema,
       response: {
-        201: createUserResponseSchema,
+        201: createUserResponseSchema.describe('Successful account creation response'),
       }
     }
   }, signUp)
@@ -37,9 +41,11 @@ export async function authRoutes(app: FastifyInstance) {
 
   server.post('/login', {
     schema: {
+      description: 'login endpoint',
+      tags: ['auth'],
       body: loginUserSchema,
       response: {
-        200: loginUserResponseSchema,
+        200: loginUserResponseSchema.describe('Successful login response'),
       }
     }
   }, loginUserHandler);
@@ -47,8 +53,10 @@ export async function authRoutes(app: FastifyInstance) {
 
   server.delete('/logout', {
     schema: {
+      description: 'logout endpoint',
+      tags: ['auth'],
       response: {
-        200: logoutResponseSchema,
+        200: logoutResponseSchema.describe('Successful logout response'),
       }
     }
   }, logoutHandler)

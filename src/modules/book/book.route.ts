@@ -8,17 +8,21 @@ export async function bookRoutes(app: FastifyInstance) {
 
   server.get('/', {
     schema: {
+      description: 'homepage endpoint',
+      tags: ['book'],
       response: {
-        200: getBooksResponseSchema,
+        200: getBooksResponseSchema.describe('Default response'),
       },
     },
   }, getRecentBooksHandler);
 
   server.get('/:id', {
     schema: {
+      description: 'get single book endpoint',
+      tags: ['book'],
       params: getBookParamsSchema,
       response: {
-        200: singleBookResponseSchema
+        200: singleBookResponseSchema.describe('Successful response')
       },
     }
   }, getBookHandler)

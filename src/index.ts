@@ -5,11 +5,13 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { authRoutes } from './modules/auth/auth.routes.js';
 import { userRoutes } from './modules/user/user.routes.js';
 import { bookRoutes } from './modules/book/book.route.js';
-import { serializerCompiler, validatorCompiler, type ZodTypeProvider } from 'fastify-type-provider-zod';
+import { jsonSchemaTransform, serializerCompiler, validatorCompiler, type ZodTypeProvider } from 'fastify-type-provider-zod';
 import fastifyJwt from '@fastify/jwt';
 import fCookie from '@fastify/cookie';
 import { ApiError } from './errors/ApiError.js';
 import { ZodError } from 'zod';
+import fastifySwagger from '@fastify/swagger';
+import fastifySwaggerUi from '@fastify/swagger-ui';
 
 
 // 1. Configuration de la Base de Données (Le tuyau DB)
@@ -110,6 +112,36 @@ app.setErrorHandler((error, request, reply) => {
     message: 'Internal server error',
   })
 })
+
+// swagger pour la documentation
+if (process.env.NODE_ENV !== 'production'){
+  await app.register(fastifySwagger, {
+    openapi: {
+      info: {
+        title: 'Ink&Voices API',
+        version: '1.0.0'
+      },
+      servers: [
+        {
+          url: 'http://localhost:8032',
+          description: 'development server'
+        }
+      ],
+      tags: [
+        { name: 'auth', description: 'Authentication related endpoints'},
+        { name: 'user', description: 'Users related endpoints'},
+        { name: 'book', description: 'Books related endpoints'}
+      ]
+    },
+    // Le swagger s'attend à recevoir du JSON schema brut.
+    // on utilise les schémas Zod, il faut donc les transformer en JSON
+    transform: jsonSchemaTransform
+  });
+
+  await app.register(fastifySwaggerUi, {
+    routePrefix: '/documentation'
+  });
+}
 
 // routes
 app.register(authRoutes, {prefix: 'api/auth'})

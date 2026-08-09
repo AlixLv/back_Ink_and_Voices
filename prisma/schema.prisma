@@ -7,18 +7,16 @@ datasource db {
   provider = "postgresql"
 }
 
-
 model user {
   id String @id @default(uuid())
   email String @unique
   username String @unique
   password String
   role role @default(user)
-  book_suggestions book[] //attribut pas présent dans nos MCD et MLD. A ajouter si on fonctionne comme cela. 
-  created_at DateTime @default(now()) //a modifier dans MLD
+  book_suggestions book[] 
+  created_at DateTime @default(now()) 
   updated_at DateTime @updatedAt 
-  validations book_validation[] // attribut à ajouter dans MCD et MLD
-  //session Session? 
+  validations book_validation[] 
 
   @@map("user")
 }
@@ -88,17 +86,6 @@ model book_validation {
   admin user @relation(fields: [admin_id], references: [id])
   validation_date DateTime @default(now())
   created_at DateTime @default(now())
-  updated_at DateTime @default(now()) //si un livre est validé, puis refusé, le référencer dans la db et mettre en place une purge des données régulière ?
   status status
   comment String? @db.Text
 }
-
-
-// model non existant dans le MCD et MLD
-// model Session {
-//   id String @id @default(uuid())
-//   sessionToken String @unique
-//   contributeuriceId String @unique
-//   contributeurice Contributeurice @relation(fields: [contributeuriceId], references:[id])
-//   expire DateTime
-// }

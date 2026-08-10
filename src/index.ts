@@ -12,6 +12,7 @@ import { ApiError } from './errors/ApiError.js';
 import { ZodError } from 'zod';
 import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUi from '@fastify/swagger-ui';
+import { UnauthorizedError } from './errors/ApiError.js';
 
 
 // 1. Configuration de la Base de Données (Le tuyau DB)
@@ -69,17 +70,13 @@ await app.register(fCookie, {
 })
 
 // Déclaration de authenticate, qui sera utilisé sur les routes protégées
-app.decorate('authenticate', async function(
-  req: FastifyRequest,
-  reply: FastifyReply) {
+app.decorate('authenticate', async function(req: FastifyRequest) {
     try {
-        await req.jwtVerify({ onlyCookie: true })
-        console.log('✅ Token vérifié avec succès')
-    } catch (err){
-        console.log('❌ Erreur JWT:', err);
-        reply.code(401).send({message: "Token invalide ou absent"})
-  }
-})
+        await req.jwtVerify({ onlyCookie: true });
+    } catch {
+        throw new UnauthorizedError('Token invalide ou absent');
+    }
+});
 
 app.setErrorHandler((error, request, reply) => {
   request.log.error(error);

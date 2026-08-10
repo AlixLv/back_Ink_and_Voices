@@ -8,11 +8,11 @@ import { bookRoutes } from './modules/book/book.route.js';
 import { jsonSchemaTransform, serializerCompiler, validatorCompiler, type ZodTypeProvider } from 'fastify-type-provider-zod';
 import fastifyJwt from '@fastify/jwt';
 import fCookie from '@fastify/cookie';
-import { ApiError } from './errors/ApiError.js';
+import { ApiError, UnauthorizedError } from './errors/ApiError.js';
 import { ZodError } from 'zod';
 import fastifySwagger from '@fastify/swagger';
-import fastifySwaggerUi from '@fastify/swagger-ui';
-import { UnauthorizedError } from './errors/ApiError.js';
+ import fastifySwaggerUi from '@fastify/swagger-ui';
+
 
 
 // 1. Configuration de la Base de Données (Le tuyau DB)

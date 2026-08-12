@@ -74,7 +74,7 @@ app.decorate('authenticate', async function(req: FastifyRequest) {
     try {
         await req.jwtVerify({ onlyCookie: true });
     } catch {
-        throw new UnauthorizedError('Token invalide ou absent');
+        throw new UnauthorizedError('Vous n\'êtes pas authorisé.e');
     }
 });
 

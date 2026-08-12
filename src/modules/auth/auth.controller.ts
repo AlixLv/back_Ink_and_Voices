@@ -21,14 +21,15 @@ export async function signUp(
         }
 
     const hashPassword = await argon2.hash(password);
+    
     const user = await req.server.prisma.user.create({
         data: {
             email,
             username,
             password: hashPassword,
-        }
+        }    
     });
-    return reply.code(201).send(user)
+    return reply.code(201).send()
     }
 
 // Le cookie access_token est httpOnly : le front ne peut pas le supprimer
@@ -74,7 +75,7 @@ export async function loginUserHandler(
             maxAge: 14 * 24 * 60 * 60, 
             path: '/'
         })
-        return reply.code(200).send({ email: user.email, username: user.username });
+        return reply.code(200).send();
     } else {
             throw new InvalidCredentialsError();      
         } 

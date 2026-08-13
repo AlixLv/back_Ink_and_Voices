@@ -1,11 +1,10 @@
 import app from '../../../index';
-import { test, expect, it, describe, beforeEach, afterEach } from 'vitest';
+import { expect, it, describe, afterEach } from 'vitest';
 import { PrismaClient } from '../../../generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 
 
 const dbUrl = process.env.TEST_DATABASE;
-console.log("🌸 dbURL utilisée: ", dbUrl)
 const adapter = new PrismaPg({ connectionString: dbUrl });
 const prisma = new PrismaClient({ adapter });
 
@@ -16,7 +15,7 @@ describe('check the server is working', () => {
         await app.ready();
         const response = await app.inject({
             method: 'GET', 
-            url: '/api/auth/' //mais ça devrait pas être la page d'acceuil? juste "/" ?
+            url: '/api/auth/' 
         });
     expect(response.statusCode).toBe(200);
     expect(response.json()).toEqual({ message: '/ route hit success' });

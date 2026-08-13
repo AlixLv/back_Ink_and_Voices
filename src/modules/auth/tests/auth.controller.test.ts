@@ -22,7 +22,7 @@ describe('signUp', () => {
     const mockFindUnique = vi.fn();
     const mockCreate = vi.fn();
 
-    // simulation de l'objet req que Fastify passerait normalement ) signUp.
+    // simulation de l'objet req que Fastify passerait normalement à signUp.
     const mockReq = {
         body: {
             email: 'guillemette@gmail.com',

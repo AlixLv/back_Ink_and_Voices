@@ -1,0 +1,45 @@
+# .github/dependabot.yml (backend)
+version: 2
+updates:
+  # Dépendances npm (package.json)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    groups:
+      # Regroupe les mises à jour mineures/patch pour éviter le bruit de PRs
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+    # Prisma est central dans notre architecture : on valide une
+    # montée de version majeure manuellement plutôt que
+    # via une PR automatique
+    ignore:
+      - dependency-name: "@prisma/client"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "prisma"
+        update-types: ["version-update:semver-major"]
+    labels:
+      - "dependencies"
+      - "backend"
+
+  # Image de base du Dockerfile (node:24-alpine)
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "docker"
+
+  # Actions utilisées dans notre workflow CI
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "ci"

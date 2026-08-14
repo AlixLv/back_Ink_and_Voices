@@ -5,6 +5,8 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { authRoutes } from './modules/auth/auth.routes.js';
 import { userRoutes } from './modules/user/user.routes.js';
 import { bookRoutes } from './modules/book/book.route.js';
+import { typeRoutes } from './modules/type/type.routes.js';
+import { themeRoutes } from './modules/theme/theme.routes.js';
 import { jsonSchemaTransform, serializerCompiler, validatorCompiler, type ZodTypeProvider } from 'fastify-type-provider-zod';
 import fastifyJwt from '@fastify/jwt';
 import fCookie from '@fastify/cookie';
@@ -130,7 +132,9 @@ if (process.env.NODE_ENV !== 'production'){
       tags: [
         { name: 'auth', description: 'Authentication related endpoints'},
         { name: 'user', description: 'Users related endpoints'},
-        { name: 'book', description: 'Books related endpoints'}
+        { name: 'book', description: 'Books related endpoints'},
+        { name: 'type', description: 'Book types (genres) related endpoints'},
+        { name: 'theme', description: 'Book themes related endpoints'}
       ]
     },
     // Le swagger s'attend à recevoir du JSON schema brut.
@@ -148,6 +152,8 @@ app.register(authRoutes, {prefix: 'api/auth'})
 app.register(userRoutes, {prefix: 'api/users'})
 
 app.register(bookRoutes, { prefix: '/api/books' });
+app.register(typeRoutes, { prefix: '/api/types' });
+app.register(themeRoutes, { prefix: '/api/themes' });
 
 // graceful shutdown
 const listeners = ['SIGINT', 'SIGTERM']

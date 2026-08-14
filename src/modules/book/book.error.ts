@@ -11,3 +11,9 @@ export class BookFetchError extends ApiError {
     super(500, message, 'BOOK_FETCH_ERROR');
   }
 }
+
+export class BookCreateError extends ApiError {
+  constructor(message = 'Erreur lors de la création du livre') {
+    super(500, message, 'BOOK_CREATE_ERROR');
+  }
+}

@@ -1,7 +1,7 @@
 import { expect, expectTypeOf, describe, it, vi, beforeEach, beforeAll } from 'vitest';
 import { bookSchema, getBooksResponseSchema, bookDetailSchema } from './book.schema';
-import { getRecentBooksHandler, getBookHandler } from './book.controller';
-import { BookFetchError } from './book.error';
+import { getRecentBooksHandler, getBookHandler, createBookHandler } from './book.controller';
+import { BookFetchError, BookCreateError } from './book.error';
 import 'dotenv/config';
 import { mock } from 'node:test'
 
@@ -254,3 +254,131 @@ describe('getBookHandler', () => {
     );
   });
 });
+
+describe('createBookHandler', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  const validBody = {
+    title: 'Nouveau Livre',
+    author: 'Nouvelle Autrice',
+    publishing_house: 'Une Maison',
+    short_description: 'Une description.',
+    publication_year: null,
+    resume: null,
+    reference_link: null,
+    type_id: 1,
+    theme_ids: [1, 2],
+  }
+
+  // forme brute renvoyée par Prisma, avec la join-table theme_book (comme getBookHandler)
+  const mockCreatedBook = {
+    id: 42,
+    title: validBody.title,
+    author: validBody.author,
+    short_description: validBody.short_description,
+    reference_link: null,
+    created_at: new Date(),
+    type: { id: 1, type_name: 'Poésie', url_image: null },
+    themes: [
+      { theme: { id: 1, theme_name: 'Racisme' } },
+      { theme: { id: 2, theme_name: 'Féminisme' } },
+    ],
+    publishing_house: validBody.publishing_house,
+    publication_year: null,
+    resume: null,
+  }
+
+  const mockCreate = vi.fn().mockResolvedValue(mockCreatedBook)
+
+  const mockReq = {
+    body: validBody,
+    user: { id: 'user-uuid' },
+    server: {
+      prisma: {
+        book: {
+          create: mockCreate,
+        },
+      },
+    },
+    log: { error: vi.fn() },
+  } as any
+
+  const mockReply = {
+    code: vi.fn().mockReturnThis(),
+    send: vi.fn().mockReturnThis(),
+  } as any
+
+  it('returns 201 with the created book, themes mapped to {id, theme_name}', async () => {
+    await createBookHandler(mockReq, mockReply)
+
+    expect(mockReply.code).toHaveBeenCalledWith(201)
+    expect(mockReply.send).toHaveBeenCalledWith({
+      id: mockCreatedBook.id,
+      title: mockCreatedBook.title,
+      author: mockCreatedBook.author,
+      short_description: mockCreatedBook.short_description,
+      publishing_house: mockCreatedBook.publishing_house,
+      publication_year: mockCreatedBook.publication_year,
+      resume: mockCreatedBook.resume,
+      reference_link: mockCreatedBook.reference_link,
+      created_at: mockCreatedBook.created_at,
+      type: mockCreatedBook.type,
+      themes: [
+        { id: 1, theme_name: 'Racisme' },
+        { id: 2, theme_name: 'Féminisme' },
+      ],
+    })
+  })
+
+  it('validates a correct detailed book response', async () => {
+    await createBookHandler(mockReq, mockReply)
+    const sentPayload = mockReply.send.mock.calls[0][0]
+    const result = bookDetailSchema.safeParse(sentPayload)
+    expect(result.success).toBe(true)
+  })
+
+  it('attributes the book to req.user.id, never to a client-supplied user_id', async () => {
+    await createBookHandler(mockReq, mockReply)
+
+    expect(mockCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          user: { connect: { id: 'user-uuid' } },
+        }),
+      })
+    )
+  })
+
+  it('never sends a status field: relies on the DB default (pending)', async () => {
+    await createBookHandler(mockReq, mockReply)
+
+    const createArgs = mockCreate.mock.calls[0]![0]
+    expect(createArgs.data).not.toHaveProperty('status')
+  })
+
+  it('connects the given type_id and theme_ids', async () => {
+    await createBookHandler(mockReq, mockReply)
+
+    expect(mockCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          type: { connect: { id: 1 } },
+          themes: {
+            create: [
+              { theme: { connect: { id: 1 } } },
+              { theme: { connect: { id: 2 } } },
+            ],
+          },
+        }),
+      })
+    )
+  })
+
+  it('throws BookCreateError when Prisma rejects', async () => {
+    mockCreate.mockRejectedValueOnce(new Error('DB connection lost'))
+
+    await expect(createBookHandler(mockReq, mockReply)).rejects.toThrow(BookCreateError)
+  })
+})

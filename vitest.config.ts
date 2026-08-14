@@ -1,9 +1,7 @@
 import { defineConfig } from 'vitest/config'
-import { loadEnv } from 'vite'
 
-export default defineConfig(({mode}) => {
-  // chargement du fichier .env pour avoir accès aux variables
-  const env = loadEnv(mode, process.cwd(), '')
+
+export default defineConfig(() => {
 
   return { 
     test: {

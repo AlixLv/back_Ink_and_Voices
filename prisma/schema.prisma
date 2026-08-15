@@ -84,7 +84,6 @@ model book_validation {
   book book @relation(fields: [book_id], references: [id])
   admin_id String
   admin user @relation(fields: [admin_id], references: [id])
-  validation_date DateTime @default(now())
   created_at DateTime @default(now())
   status status
   comment String? @db.Text

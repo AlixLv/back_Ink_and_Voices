@@ -25,7 +25,7 @@ describe('Test /api/users/me', () => {
             username: 'testuser', 
             password:'testpassword123'
         }
-        const response = await app.inject({
+        await app.inject({
             method: 'POST',
             url: '/api/auth/signup',
             payload: newUserData

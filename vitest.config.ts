@@ -1,9 +1,9 @@
 import { defineConfig } from 'vitest/config'
 import { loadEnv } from 'vite'
 
-export default defineConfig(({mode}) => {
-  // chargement du fichier .env pour avoir accès aux variables
+export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
+  Object.assign(process.env, env) // charge réellement .env dans process.env
 
   return { 
     test: {
@@ -11,9 +11,8 @@ export default defineConfig(({mode}) => {
         LOCAL_DATABASE_URL: process.env.LOCAL_DATABASE_URL
       },
       environment: 'node',
-      globals: true, // pour utiliser les fonctions expect, describe, etc. sans les importer
+      globals: true,
       include: ['**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     }
   }
 })
-

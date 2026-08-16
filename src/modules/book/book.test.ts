@@ -1,9 +1,12 @@
-import { expect, expectTypeOf, describe, it, vi, beforeEach, beforeAll } from 'vitest';
-import { bookSchema, getBooksResponseSchema, bookDetailSchema } from './book.schema';
+import { expect, expectTypeOf, describe, it, vi, beforeEach } from 'vitest';
+import { bookSchema, getBooksResponseSchema, bookDetailSchema, getBookParamsSchema } from './book.schema';
 import { getRecentBooksHandler, getBookHandler } from './book.controller';
 import { BookFetchError } from './book.error';
 import 'dotenv/config';
-import { mock } from 'node:test'
+import type { FastifyRequest, FastifyReply } from 'fastify';
+
+type GetBookParams = z.infer<typeof getBookParamsSchema>
+
 
 describe('book schema', () => {
   beforeEach(() => {
@@ -104,12 +107,12 @@ describe('getRecentBooksHandler', () => {
       },
     },
     log: { error: vi.fn() },
-  } as any
+  } as unknown as FastifyRequest
 
   const mockReply = {
     code: vi.fn().mockReturnThis(),
     send: vi.fn().mockReturnThis(),
-  } as any
+  } as unknown as FastifyReply
 
   it('returns 200 with formatted books', async () => {
     await getRecentBooksHandler(mockReq, mockReply)
@@ -178,12 +181,12 @@ describe('getBookHandler', () => {
       },
     },
     log: {error: vi.fn()},
-  } as any
+  } as unknown as FastifyRequest<{ Params: GetBookParams}>
 
   const mockReply = {
     code: vi.fn().mockReturnThis(),
     send: vi.fn().mockReturnThis(),
-  } as any
+  } as unknown as FastifyReply
 
   it('should return 200 with formatted book', async () => {
     await getBookHandler(mockReq, mockReply)

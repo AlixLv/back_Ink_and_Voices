@@ -1,4 +1,4 @@
-import { ConflictError, NotFoundError, UnauthorizedError } from '../../errors/ApiError';
+import { ConflictError, UnauthorizedError } from '../../errors/ApiError';
 
 export class UserAlreadyExistsError extends ConflictError {
     constructor(email: string) {

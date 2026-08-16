@@ -1,9 +1,10 @@
 import { expect, it, describe, vi, beforeEach } from 'vitest';
 import * as argon2 from 'argon2';
 import { signUp, loginUserHandler } from '../auth.controller';
-import { createUserSchema, loginUserSchema } from '../auth.schema';
+import { createUserSchema } from '../auth.schema';
 import { UserAlreadyExistsError, InvalidCredentialsError } from '../auth.errors';
 import 'dotenv/config'
+import type {FastifyRequest, FastifyReply}  from 'fastify';
 
 const dbUrl = process.env.TEST_DATABASE;
 console.log("Database utilisée: ", dbUrl)
@@ -22,7 +23,7 @@ describe('signUp', () => {
     const mockFindUnique = vi.fn();
     const mockCreate = vi.fn();
 
-    // simulation de l'objet req que Fastify passerait normalement ) signUp.
+    // simulation de l'objet req que Fastify passerait normalement à signUp.
     const mockReq = {
         body: {
             email: 'guillemette@gmail.com',
@@ -37,12 +38,12 @@ describe('signUp', () => {
                 },
             },
         },
-    } as any;
+    } as unknown as FastifyRequest;
 
     const mockReply = {
         code: vi.fn().mockReturnThis(),
         send: vi.fn().mockReturnThis(),
-    } as any;
+    } as unknown as FastifyReply;
 
     it('throws UserAlreadyExistsError and does not create a user', async () => {
         // on simule le fait que Prisma a trouvé un user et retourne cet objet user.
@@ -89,13 +90,13 @@ describe('loginUserHandler', () => {
                 sign: mockJwtSign,
             },
         },
-    } as any;
+    } as unknown as FastifyRequest;
 
     const mockReply = {
         code: vi.fn().mockReturnThis(),
         send: vi.fn().mockReturnThis(),
         setCookie: vi.fn().mockReturnThis(),
-    } as any;
+    } as unknown as FastifyReply;
 
     it('throws InvalidCredentialsError and does not set a cookie', async () => {
         mockFindUnique.mockResolvedValueOnce({

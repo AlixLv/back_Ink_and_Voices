@@ -16,7 +16,7 @@ if (!dbUrl) throw new Error(`DATABASE_URL not configured for ${process.env.NODE_
 
 const pool = new Pool({ connectionString: dbUrl });
 
-const adapter = new PrismaPg(pool as any);
+const adapter = new PrismaPg(pool);
 
 const prisma = new PrismaClient({ adapter });
 
@@ -94,7 +94,7 @@ async function main() {
     },
   });
 
-  const adventureTheme = await prisma.theme.upsert({
+  await prisma.theme.upsert({
     where: {theme_name: 'Aventure'},
     update: {},
     create: {

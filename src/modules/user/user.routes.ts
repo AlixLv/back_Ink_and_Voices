@@ -1,5 +1,4 @@
 import type { FastifyInstance } from "fastify";
-import { z } from 'zod';
 import {type ZodTypeProvider } from 'fastify-type-provider-zod';
 
 import {updateUser, getUserLogged} from './user.controller.js';

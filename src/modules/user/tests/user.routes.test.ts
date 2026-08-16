@@ -1,9 +1,8 @@
 import app from '../../../index';
-import { describe, beforeEach, beforeAll, expect, it, afterAll, afterEach } from "vitest";
+import { describe, beforeAll, expect, it, afterAll, afterEach } from "vitest";
 import { PrismaClient } from '../../../generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
-import { string } from 'zod';
-import { profile } from 'console';
+
 
 const dbUrl = process.env.TEST_DATABASE;
 const adapter = new PrismaPg({ connectionString: dbUrl });
@@ -16,7 +15,6 @@ beforeAll(async () => {
 // test d'intégration route protégée profile
 describe('Test /api/users/me', () => {
     afterEach(async() => {
-//    beforeEach(async() => {
         await prisma.user.deleteMany({
             where: { email: 'testuser@example.com'}
         })
@@ -27,7 +25,7 @@ describe('Test /api/users/me', () => {
             username: 'testuser', 
             password:'testpassword123'
         }
-        const response = await app.inject({
+        await app.inject({
             method: 'POST',
             url: '/api/auth/signup',
             payload: newUserData
@@ -41,7 +39,7 @@ describe('Test /api/users/me', () => {
                 password:'testpassword123'
             }
         })
-        const bodyLogin = loginResponse.json();
+       
         const cookieHeader = loginResponse.headers['set-cookie']
         const rawCookie = (Array.isArray(cookieHeader) ? cookieHeader[0] : cookieHeader) ?? ""
         const token = rawCookie.split(';')[0]?.split('=').slice(1).join('=')

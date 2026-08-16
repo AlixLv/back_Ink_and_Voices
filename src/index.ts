@@ -1,4 +1,4 @@
-import Fastify, { fastify, type FastifyReply, type FastifyRequest } from 'fastify';
+import Fastify, { type FastifyReply, type FastifyRequest } from 'fastify';
 import cors from "@fastify/cors";
 import { PrismaClient, Prisma } from './generated/prisma/client.js';
 import { PrismaPg } from '@prisma/adapter-pg';
@@ -11,7 +11,7 @@ import fCookie from '@fastify/cookie';
 import { ApiError } from './errors/ApiError.js';
 import { ZodError } from 'zod';
 import fastifySwagger from '@fastify/swagger';
-import fastifySwaggerUi from '@fastify/swagger-ui';
+import fastifySwaggerUi from '@fastify/swagger-ui'; 
 
 
 // 1. Configuration de la Base de Données (Le tuyau DB)

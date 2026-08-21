@@ -13,6 +13,7 @@ model user {
   email String @unique
   username String @unique
   password String
+  avatar String?
   role role @default(user)
   book_suggestions book[] //attribut pas présent dans nos MCD et MLD. A ajouter si on fonctionne comme cela. 
   created_at DateTime @default(now()) //a modifier dans MLD

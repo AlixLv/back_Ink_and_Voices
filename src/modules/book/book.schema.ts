@@ -59,3 +59,75 @@ export const createBookSchema = z.object({
 export type CreateBookInput = z.infer<typeof createBookSchema>;
 
 export const createBookResponseSchema = bookDetailSchema;
+
+export const pendingBooksResponseSchema = z.array(bookDetailSchema);
+
+export const validateBookSchema = z.object({
+  status: z.enum(['validated', 'refused']),
+  comment: z.string().nullable().default(null),
+});
+
+export type ValidateBookInput = z.infer<typeof validateBookSchema>;
+
+export const validateBookResponseSchema = z.object({
+  id: z.number(),
+  status: z.enum(['validated', 'refused']),
+  comment: z.string().nullable(),
+});
+
+export const getBooksQuerySchema = z.object({
+  search: z.string().trim().min(1).max(200).optional(),
+  type_id: z.coerce.number().int().positive().optional(),
+  theme_id: z.coerce.number().int().positive().optional(),
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(50).default(12),
+});
+
+export const paginatedBooksResponseSchema = z.object({
+  items: getBooksResponseSchema,
+  total: z.number(),
+  page: z.number(),
+  page_count: z.number(),
+});
+
+export type GetBooksQuery = z.infer<typeof getBooksQuerySchema>;
+
+export const myContributionSchema = z.object({
+  id: z.number(),
+  title: z.string(),
+  author: z.string(),
+  short_description: z.string(),
+  status: z.enum(['pending', 'validated', 'refused']),
+  created_at: z.date(),
+  type: z.object({
+    id: z.number(),
+    type_name: z.string(),
+  }),
+  validation_comment: z.string().nullable(),
+});
+
+export const myContributionsResponseSchema = z.array(myContributionSchema);
+
+export const validationHistoryItemSchema = z.object({
+  id: z.number(),
+  status: z.enum(['pending', 'validated', 'refused']),
+  comment: z.string().nullable(),
+  validation_date: z.date(),
+  book: z.object({
+    id: z.number(),
+    title: z.string(),
+    author: z.string(),
+  }),
+  admin: z.object({
+    username: z.string(),
+  }),
+});
+
+export const validationHistoryResponseSchema = z.array(validationHistoryItemSchema);
+export const updateBookSchema = createBookSchema;
+
+export type UpdateBookInput = z.infer<typeof updateBookSchema>;
+
+export const deleteBookResponseSchema = z.object({
+  message: z.string(),
+});

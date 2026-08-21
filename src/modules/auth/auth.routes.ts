@@ -8,10 +8,6 @@ import { createUserSchema, createUserResponseSchema, loginUserSchema, loginUserR
 import { loginUserHandler, logoutHandler } from './auth.controller.js';
 
 
-export function faireUnTest(a : String) {
-    return a;
-}
-
 export async function authRoutes(app: FastifyInstance) {
   const server = app.withTypeProvider<ZodTypeProvider>()
 

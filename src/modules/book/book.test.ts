@@ -94,12 +94,15 @@ describe('getRecentBooksHandler', () => {
   ]
 
   const mockFindMany = vi.fn().mockResolvedValue(mockBooks)
+  const mockCount = vi.fn().mockResolvedValue(mockBooks.length)
 
   const mockReq = {
+    query: { page: 1, limit: 12 },
     server: {
       prisma: {
         book: {
           findMany: mockFindMany,
+          count: mockCount,
         },
       },
     },
@@ -115,12 +118,17 @@ describe('getRecentBooksHandler', () => {
     await getRecentBooksHandler(mockReq, mockReply)
 
     expect(mockReply.code).toHaveBeenCalledWith(200)
-    expect(mockReply.send).toHaveBeenCalledWith([
-      {
-        ...mockBooks[0],
-        themes: [{ id: 1, theme_name: 'Féminisme' }],
-      },
-    ])
+    expect(mockReply.send).toHaveBeenCalledWith({
+      items: [
+        {
+          ...mockBooks[0],
+          themes: [{ id: 1, theme_name: 'Féminisme' }],
+        },
+      ],
+      total: 1,
+      page: 1,
+      page_count: 1,
+    })
   })
 
   it('throws BookFetchError when Prisma rejects', async () => {

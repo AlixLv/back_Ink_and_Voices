@@ -96,6 +96,7 @@ describe('getRecentBooksHandler', () => {
   const mockFindMany = vi.fn().mockResolvedValue(mockBooks)
 
   const mockReq = {
+    query: {},
     server: {
       prisma: {
         book: {

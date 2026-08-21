@@ -1,6 +1,6 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { Prisma } from '../../generated/prisma/client.js';
-import type { getBookParamsSchema, bookDetailSchema, CreateBookInput, ValidateBookInput } from './book.schema';
+import type { getBookParamsSchema, bookDetailSchema, CreateBookInput, ValidateBookInput, GetBooksQuery } from './book.schema';
 import { z } from 'zod';
 import { BookNotFoundError, BookFetchError, BookCreateError, BookAlreadyExistsError, InvalidBookReferenceError } from './book.error';
 
@@ -21,12 +21,26 @@ export async function getRecentBooksHandler(
   req: FastifyRequest,
   reply: FastifyReply
 ) {
+  const { search, type_id, theme_id } = req.query as GetBooksQuery;
+
+  const where: Prisma.bookWhereInput = { status: 'validated' };
+  if (search) {
+    where.OR = [
+      { title: { contains: search, mode: 'insensitive' } },
+      { author: { contains: search, mode: 'insensitive' } },
+    ];
+  }
+  if (type_id) {
+    where.type_id = type_id;
+  }
+  if (theme_id) {
+    where.themes = { some: { theme_id } };
+  }
+
   let books;
   try {
     books = await req.server.prisma.book.findMany({
-      where: {
-        status: 'validated',
-      },
+      where,
       orderBy: {
         created_at: 'desc',
       },
@@ -244,4 +258,69 @@ export async function validateBookHandler(
     status: validation.status,
     comment: validation.comment,
   });
+}
+
+export async function getMyContributionsHandler(
+  req: FastifyRequest,
+  reply: FastifyReply
+) {
+  let books;
+  try {
+    books = await req.server.prisma.book.findMany({
+      where: { user_id: req.user.id },
+      orderBy: { created_at: 'desc' },
+      include: {
+        type: { select: { id: true, type_name: true } },
+        validations: {
+          orderBy: { validation_date: 'desc' },
+          take: 1,
+          select: { comment: true },
+        },
+      },
+    });
+  } catch (e) {
+    req.log.error(e);
+    throw new BookFetchError();
+  }
+
+  type ContributionBook = Prisma.bookGetPayload<{
+    include: {
+      type: { select: { id: true; type_name: true } };
+      validations: { select: { comment: true } };
+    };
+  }>;
+
+  const formatted = books.map((book: ContributionBook) => ({
+    id: book.id,
+    title: book.title,
+    author: book.author,
+    short_description: book.short_description,
+    status: book.status,
+    created_at: book.created_at,
+    type: book.type,
+    validation_comment: book.validations[0]?.comment ?? null,
+  }));
+
+  return reply.code(200).send(formatted);
+}
+
+export async function getValidationHistoryHandler(
+  req: FastifyRequest,
+  reply: FastifyReply
+) {
+  let validations;
+  try {
+    validations = await req.server.prisma.book_validation.findMany({
+      orderBy: { validation_date: 'desc' },
+      include: {
+        book: { select: { id: true, title: true, author: true } },
+        admin: { select: { username: true } },
+      },
+    });
+  } catch (e) {
+    req.log.error(e);
+    throw new BookFetchError();
+  }
+
+  return reply.code(200).send(validations);
 }

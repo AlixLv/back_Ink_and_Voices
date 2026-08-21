@@ -1,20 +1,43 @@
 import type { FastifyInstance } from 'fastify';
 import { type ZodTypeProvider } from 'fastify-type-provider-zod';
-import { getRecentBooksHandler, getBookHandler, createBookHandler, getPendingBooksHandler, validateBookHandler } from './book.controller.js';
-import { getBooksResponseSchema, singleBookResponseSchema, getBookParamsSchema, createBookSchema, createBookResponseSchema, pendingBooksResponseSchema, validateBookSchema, validateBookResponseSchema } from './book.schema.js';
+import { getRecentBooksHandler, getBookHandler, createBookHandler, getPendingBooksHandler, validateBookHandler, getMyContributionsHandler, getValidationHistoryHandler } from './book.controller.js';
+import { getBooksResponseSchema, singleBookResponseSchema, getBookParamsSchema, createBookSchema, createBookResponseSchema, pendingBooksResponseSchema, validateBookSchema, validateBookResponseSchema, getBooksQuerySchema, myContributionsResponseSchema, validationHistoryResponseSchema } from './book.schema.js';
 
 export async function bookRoutes(app: FastifyInstance) {
   const server = app.withTypeProvider<ZodTypeProvider>();
 
   server.get('/', {
     schema: {
-      description: 'homepage endpoint',
+      description: 'list validated books, optionally filtered by search, type or theme',
       tags: ['book'],
+      querystring: getBooksQuerySchema,
       response: {
         200: getBooksResponseSchema.describe('Default response'),
       },
     },
   }, getRecentBooksHandler);
+
+  server.get('/mine', {
+    preHandler: [app.authenticate],
+    schema: {
+      description: 'list the books suggested by the connected user',
+      tags: ['book'],
+      response: {
+        200: myContributionsResponseSchema.describe('My contributions'),
+      },
+    },
+  }, getMyContributionsHandler);
+
+  server.get('/validations', {
+    preHandler: [app.authenticate, app.isAdmin],
+    schema: {
+      description: 'validation decisions history (admin only)',
+      tags: ['book'],
+      response: {
+        200: validationHistoryResponseSchema.describe('Validation history'),
+      },
+    },
+  }, getValidationHistoryHandler);
 
   server.get('/:id', {
     schema: {

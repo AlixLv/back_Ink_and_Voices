@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { type ZodTypeProvider } from 'fastify-type-provider-zod';
 import { getRecentBooksHandler, getBookHandler, createBookHandler, getPendingBooksHandler, validateBookHandler, getMyContributionsHandler, getValidationHistoryHandler, updateBookHandler, deleteBookHandler } from './book.controller.js';
-import { getBooksResponseSchema, singleBookResponseSchema, getBookParamsSchema, createBookSchema, createBookResponseSchema, pendingBooksResponseSchema, validateBookSchema, validateBookResponseSchema, getBooksQuerySchema, myContributionsResponseSchema, validationHistoryResponseSchema, updateBookSchema, deleteBookResponseSchema } from './book.schema.js';
+import { paginatedBooksResponseSchema, singleBookResponseSchema, getBookParamsSchema, createBookSchema, createBookResponseSchema, pendingBooksResponseSchema, validateBookSchema, validateBookResponseSchema, getBooksQuerySchema, myContributionsResponseSchema, validationHistoryResponseSchema, updateBookSchema, deleteBookResponseSchema } from './book.schema.js';
 
 export async function bookRoutes(app: FastifyInstance) {
   const server = app.withTypeProvider<ZodTypeProvider>();
@@ -12,7 +12,7 @@ export async function bookRoutes(app: FastifyInstance) {
       tags: ['book'],
       querystring: getBooksQuerySchema,
       response: {
-        200: getBooksResponseSchema.describe('Default response'),
+        200: paginatedBooksResponseSchema.describe('Paginated validated books'),
       },
     },
   }, getRecentBooksHandler);

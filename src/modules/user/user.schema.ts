@@ -1,11 +1,14 @@
 import {z} from 'zod';
 
+export const AVATAR_IDS = ['inky-01', 'inky-02', 'inky-03', 'inky-04', 'inky-05', 'inky-06'] as const;
+
 export const updateUserSchema = z.object({
     email: z.email().optional(),
     username: z.string().min(1).optional(),
     password: z.string().min(8).optional(),
+    avatar: z.enum(AVATAR_IDS).nullable().optional(),
 }).refine(
-    (data) => data.email !== undefined || data.username !== undefined || data.password !== undefined,
+    (data) => data.email !== undefined || data.username !== undefined || data.password !== undefined || data.avatar !== undefined,
     { message: 'Au moins un champ doit être fourni.' }
 )
 
@@ -18,6 +21,7 @@ export const userProfileResponseSchema = z.object({
     email: z.email(),
     username: z.string(),
     role: z.enum(['user', 'admin']),
+    avatar: z.string().nullable(),
 })
 
 export const updateUserResponseSchema = z.object({

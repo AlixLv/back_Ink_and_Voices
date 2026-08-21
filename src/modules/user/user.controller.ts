@@ -22,7 +22,8 @@ export async function getUserLogged(
         id: user.id,
         email: user.email,
         username: user.username,
-        role: user.role
+        role: user.role,
+        avatar: user.avatar
     })
 }
 
@@ -30,12 +31,13 @@ export async function updateUser(
     req: FastifyRequest,
     reply: FastifyReply
 ){
-    const { email, username, password } = req.body as UpdateUserProfile;
+    const { email, username, password, avatar } = req.body as UpdateUserProfile;
 
-    const data: {email?: string; username?: string; password?: string} = {};
+    const data: {email?: string; username?: string; password?: string; avatar?: string | null} = {};
     if (email) data.email = email;
     if (username) data.username = username;
     if (password) data.password = await argon2.hash(password);
+    if (avatar !== undefined) data.avatar = avatar;
 
     let updatedUser;
     try {

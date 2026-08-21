@@ -79,6 +79,15 @@ export const getBooksQuerySchema = z.object({
   search: z.string().trim().min(1).max(200).optional(),
   type_id: z.coerce.number().int().positive().optional(),
   theme_id: z.coerce.number().int().positive().optional(),
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(50).default(12),
+});
+
+export const paginatedBooksResponseSchema = z.object({
+  items: getBooksResponseSchema,
+  total: z.number(),
+  page: z.number(),
+  page_count: z.number(),
 });
 
 export type GetBooksQuery = z.infer<typeof getBooksQuerySchema>;

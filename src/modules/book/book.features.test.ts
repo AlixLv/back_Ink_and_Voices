@@ -134,8 +134,9 @@ describe('GET /api/books with filters', () => {
         });
         const body = response.json();
         expect(response.statusCode).toBe(200);
-        expect(body).toHaveLength(1);
-        expect(body[0].id).toBe(validatedBookId);
+        expect(body.items).toHaveLength(1);
+        expect(body.total).toBe(1);
+        expect(body.items[0].id).toBe(validatedBookId);
     });
 
     it('matches on author too and excludes non-validated books', async () => {
@@ -145,8 +146,35 @@ describe('GET /api/books with filters', () => {
         });
         const body = response.json();
         expect(response.statusCode).toBe(200);
-        expect(body.map((b: { id: number }) => b.id)).not.toContain(refusedBookId);
-        expect(body).toHaveLength(2);
+        expect(body.items.map((b: { id: number }) => b.id)).not.toContain(refusedBookId);
+        expect(body.items).toHaveLength(2);
+        expect(body.total).toBe(2);
+    });
+
+    it('paginates results with page and limit', async () => {
+        const firstPage = await app.inject({
+            method: 'GET',
+            url: `api/books?search=${encodeURIComponent('features test')}&limit=1&page=1`,
+        });
+        const secondPage = await app.inject({
+            method: 'GET',
+            url: `api/books?search=${encodeURIComponent('features test')}&limit=1&page=2`,
+        });
+        const first = firstPage.json();
+        const second = secondPage.json();
+        expect(first.items).toHaveLength(1);
+        expect(second.items).toHaveLength(1);
+        expect(first.page_count).toBe(2);
+        expect(second.page).toBe(2);
+        expect(first.items[0].id).not.toBe(second.items[0].id);
+    });
+
+    it('rejects a limit above 50 with 400', async () => {
+        const response = await app.inject({
+            method: 'GET',
+            url: 'api/books?limit=200',
+        });
+        expect(response.statusCode).toBe(400);
     });
 
     it('filters by type_id', async () => {
@@ -156,8 +184,8 @@ describe('GET /api/books with filters', () => {
         });
         const body = response.json();
         expect(response.statusCode).toBe(200);
-        expect(body).toHaveLength(1);
-        expect(body[0].title).toBe('Autre Genre Validé');
+        expect(body.items).toHaveLength(1);
+        expect(body.items[0].title).toBe('Autre Genre Validé');
     });
 
     it('filters by theme_id', async () => {
@@ -167,8 +195,8 @@ describe('GET /api/books with filters', () => {
         });
         const body = response.json();
         expect(response.statusCode).toBe(200);
-        expect(body).toHaveLength(1);
-        expect(body[0].id).toBe(validatedBookId);
+        expect(body.items).toHaveLength(1);
+        expect(body.items[0].id).toBe(validatedBookId);
     });
 
     it('rejects an invalid type_id with 400', async () => {

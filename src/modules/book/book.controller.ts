@@ -21,7 +21,7 @@ export async function getRecentBooksHandler(
   req: FastifyRequest,
   reply: FastifyReply
 ) {
-  const { search, type_id, theme_id } = req.query as GetBooksQuery;
+  const { search, type_id, theme_id, page, limit } = req.query as GetBooksQuery;
 
   const where: Prisma.bookWhereInput = { status: 'validated' };
   if (search) {
@@ -38,12 +38,16 @@ export async function getRecentBooksHandler(
   }
 
   let books;
+  let total;
   try {
+    total = await req.server.prisma.book.count({ where });
     books = await req.server.prisma.book.findMany({
       where,
       orderBy: {
         created_at: 'desc',
       },
+      skip: (page - 1) * limit,
+      take: limit,
       select: {
         id: true,
         title: true,
@@ -74,13 +78,18 @@ export async function getRecentBooksHandler(
     req.log.error(e);
     throw new BookFetchError();
   }
-  
+
   const formatted = books.map((book: BookWithRelations) => ({
     ...book,
     themes: book.themes.map((t: { theme: { id: number; theme_name: string } }) => t.theme),
   }));
 
-  return reply.code(200).send(formatted);
+  return reply.code(200).send({
+    items: formatted,
+    total,
+    page,
+    page_count: Math.max(1, Math.ceil(total / limit)),
+  });
 
 }
 

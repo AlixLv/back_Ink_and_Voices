@@ -1,8 +1,8 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import type { Prisma } from '../../generated/prisma/client';
-import type { getBookParamsSchema, bookDetailSchema } from './book.schema';
+import { Prisma } from '../../generated/prisma/client.js';
+import type { getBookParamsSchema, bookDetailSchema, CreateBookInput } from './book.schema';
 import { z } from 'zod';
-import { BookNotFoundError, BookFetchError } from './book.error';
+import { BookNotFoundError, BookFetchError, BookCreateError } from './book.error';
 
 type BookWithRelations = Prisma.bookGetPayload<{
   select: {
@@ -104,4 +104,63 @@ export async function getBookHandler(
       themes: book.themes.map((t: { theme: {id: number; theme_name: string}}) => t.theme),
     };
     return reply.code(200).send(result);
+}
+
+export async function createBookHandler(
+  req: FastifyRequest,
+  reply: FastifyReply
+) {
+  const {
+    title,
+    author,
+    publishing_house,
+    short_description,
+    publication_year,
+    resume,
+    reference_link,
+    type_id,
+    theme_ids,
+  } = req.body as CreateBookInput;
+
+  let book;
+  try {
+    book = await req.server.prisma.book.create({
+      data: {
+        title,
+        author,
+        publishing_house,
+        short_description,
+        publication_year,
+        resume,
+        reference_link,
+        type: { connect: { id: type_id } },
+        user: { connect: { id: req.user.id } },
+        themes: {
+          create: theme_ids.map((theme_id) => ({ theme: { connect: { id: theme_id } } })),
+        },
+      },
+      include: {
+        type: true,
+        themes: { include: { theme: true } },
+      },
+    });
+  } catch (e) {
+    req.log.error(e);
+    throw new BookCreateError();
+  }
+
+  const result = {
+    id: book.id,
+    title: book.title,
+    author: book.author,
+    short_description: book.short_description,
+    publishing_house: book.publishing_house,
+    publication_year: book.publication_year,
+    resume: book.resume,
+    reference_link: book.reference_link,
+    created_at: book.created_at,
+    type: book.type,
+    themes: book.themes.map((t: { theme: { id: number; theme_name: string } }) => t.theme),
+  };
+  return reply.code(201).send(result);
 }

@@ -13,3 +13,10 @@ export class ProfileConflictError extends ConflictError {
         this.code = 'PROFILE_CONFLICT';
     }
 }
+
+export class SelfRoleChangeError extends ConflictError {
+    constructor(){
+        super('Vous ne pouvez pas modifier votre propre rôle.');
+        this.code = 'SELF_ROLE_CHANGE';
+    }
+}

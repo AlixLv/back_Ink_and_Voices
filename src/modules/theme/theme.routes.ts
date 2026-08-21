@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { type ZodTypeProvider } from 'fastify-type-provider-zod';
-import { getThemesHandler } from './theme.controller.js';
-import { getThemesResponseSchema } from './theme.schema.js';
+import { getThemesHandler, createThemeHandler } from './theme.controller.js';
+import { getThemesResponseSchema, createThemeSchema, themeSchema } from './theme.schema.js';
 
 export async function themeRoutes(app: FastifyInstance) {
   const server = app.withTypeProvider<ZodTypeProvider>();
@@ -15,6 +15,18 @@ export async function themeRoutes(app: FastifyInstance) {
       },
     },
   }, getThemesHandler);
+
+  server.post('/', {
+    preHandler: [app.authenticate],
+    schema: {
+      description: 'suggest a new book theme',
+      tags: ['theme'],
+      body: createThemeSchema,
+      response: {
+        201: themeSchema.describe('Theme created'),
+      },
+    },
+  }, createThemeHandler);
 
   server.log.info('theme routes registered');
 }

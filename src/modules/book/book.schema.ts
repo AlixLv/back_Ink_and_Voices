@@ -115,3 +115,10 @@ export const validationHistoryItemSchema = z.object({
 });
 
 export const validationHistoryResponseSchema = z.array(validationHistoryItemSchema);
+export const updateBookSchema = createBookSchema;
+
+export type UpdateBookInput = z.infer<typeof updateBookSchema>;
+
+export const deleteBookResponseSchema = z.object({
+  message: z.string(),
+});

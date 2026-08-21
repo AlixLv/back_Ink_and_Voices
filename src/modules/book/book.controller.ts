@@ -1,8 +1,8 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { Prisma } from '../../generated/prisma/client.js';
-import type { getBookParamsSchema, bookDetailSchema, CreateBookInput, ValidateBookInput, GetBooksQuery } from './book.schema';
+import type { getBookParamsSchema, bookDetailSchema, CreateBookInput, UpdateBookInput, ValidateBookInput, GetBooksQuery } from './book.schema';
 import { z } from 'zod';
-import { BookNotFoundError, BookFetchError, BookCreateError, BookAlreadyExistsError, InvalidBookReferenceError } from './book.error';
+import { BookNotFoundError, BookFetchError, BookCreateError, BookAlreadyExistsError, InvalidBookReferenceError, NotBookOwnerError, BookNotEditableError } from './book.error';
 
 type BookWithRelations = Prisma.bookGetPayload<{
   select: {
@@ -323,4 +323,99 @@ export async function getValidationHistoryHandler(
   }
 
   return reply.code(200).send(validations);
+}
+
+export async function updateBookHandler(
+  req: FastifyRequest,
+  reply: FastifyReply
+) {
+  const { id } = req.params as z.infer<typeof getBookParamsSchema>;
+  const input = req.body as UpdateBookInput;
+
+  const book = await req.server.prisma.book.findUnique({ where: { id } });
+  if (!book) {
+    throw new BookNotFoundError();
+  }
+  if (book.user_id !== req.user.id) {
+    throw new NotBookOwnerError();
+  }
+  if (book.status !== 'pending') {
+    throw new BookNotEditableError();
+  }
+
+  let updated;
+  try {
+    const [, result] = await req.server.prisma.$transaction([
+      req.server.prisma.theme_book.deleteMany({ where: { book_id: id } }),
+      req.server.prisma.book.update({
+        where: { id },
+        data: {
+          title: input.title,
+          author: input.author,
+          publishing_house: input.publishing_house,
+          short_description: input.short_description,
+          publication_year: input.publication_year,
+          resume: input.resume,
+          reference_link: input.reference_link,
+          type_id: input.type_id,
+          themes: {
+            create: input.theme_ids.map((theme_id) => ({ theme: { connect: { id: theme_id } } })),
+          },
+        },
+        include: {
+          type: true,
+          themes: { include: { theme: true } },
+        },
+      }),
+    ]);
+    updated = result;
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError) {
+      if (e.code === 'P2002') throw new BookAlreadyExistsError();
+      if (e.code === 'P2003' || e.code === 'P2025') throw new InvalidBookReferenceError();
+    }
+    req.log.error(e);
+    throw new BookCreateError();
+  }
+
+  const result = {
+    id: updated.id,
+    title: updated.title,
+    author: updated.author,
+    short_description: updated.short_description,
+    publishing_house: updated.publishing_house,
+    publication_year: updated.publication_year,
+    resume: updated.resume,
+    reference_link: updated.reference_link,
+    created_at: updated.created_at,
+    type: updated.type,
+    themes: updated.themes.map((t: { theme: { id: number; theme_name: string } }) => t.theme),
+  };
+  return reply.code(200).send(result);
+}
+
+export async function deleteBookHandler(
+  req: FastifyRequest,
+  reply: FastifyReply
+) {
+  const { id } = req.params as z.infer<typeof getBookParamsSchema>;
+
+  const book = await req.server.prisma.book.findUnique({ where: { id } });
+  if (!book) {
+    throw new BookNotFoundError();
+  }
+  if (book.user_id !== req.user.id) {
+    throw new NotBookOwnerError();
+  }
+  if (book.status !== 'pending') {
+    throw new BookNotEditableError();
+  }
+
+  await req.server.prisma.$transaction([
+    req.server.prisma.theme_book.deleteMany({ where: { book_id: id } }),
+    req.server.prisma.book_validation.deleteMany({ where: { book_id: id } }),
+    req.server.prisma.book.delete({ where: { id } }),
+  ]);
+
+  return reply.code(200).send({ message: 'Suggestion supprimée.' });
 }

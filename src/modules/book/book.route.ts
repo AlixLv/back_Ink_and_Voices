@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { type ZodTypeProvider } from 'fastify-type-provider-zod';
-import { getRecentBooksHandler, getBookHandler, createBookHandler, getPendingBooksHandler, validateBookHandler, getMyContributionsHandler, getValidationHistoryHandler } from './book.controller.js';
-import { getBooksResponseSchema, singleBookResponseSchema, getBookParamsSchema, createBookSchema, createBookResponseSchema, pendingBooksResponseSchema, validateBookSchema, validateBookResponseSchema, getBooksQuerySchema, myContributionsResponseSchema, validationHistoryResponseSchema } from './book.schema.js';
+import { getRecentBooksHandler, getBookHandler, createBookHandler, getPendingBooksHandler, validateBookHandler, getMyContributionsHandler, getValidationHistoryHandler, updateBookHandler, deleteBookHandler } from './book.controller.js';
+import { getBooksResponseSchema, singleBookResponseSchema, getBookParamsSchema, createBookSchema, createBookResponseSchema, pendingBooksResponseSchema, validateBookSchema, validateBookResponseSchema, getBooksQuerySchema, myContributionsResponseSchema, validationHistoryResponseSchema, updateBookSchema, deleteBookResponseSchema } from './book.schema.js';
 
 export async function bookRoutes(app: FastifyInstance) {
   const server = app.withTypeProvider<ZodTypeProvider>();
@@ -87,6 +87,31 @@ export async function bookRoutes(app: FastifyInstance) {
       },
     },
   }, validateBookHandler);
+
+  server.put('/:id', {
+    preHandler: [app.authenticate],
+    schema: {
+      description: 'update one of your own pending suggestions',
+      tags: ['book'],
+      params: getBookParamsSchema,
+      body: updateBookSchema,
+      response: {
+        200: singleBookResponseSchema.describe('Updated suggestion'),
+      },
+    },
+  }, updateBookHandler);
+
+  server.delete('/:id', {
+    preHandler: [app.authenticate],
+    schema: {
+      description: 'withdraw one of your own pending suggestions',
+      tags: ['book'],
+      params: getBookParamsSchema,
+      response: {
+        200: deleteBookResponseSchema.describe('Suggestion deleted'),
+      },
+    },
+  }, deleteBookHandler);
 
   server.log.info('book routes registered');
 }

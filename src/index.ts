@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import Fastify, { fastify, type FastifyReply, type FastifyRequest } from 'fastify';
 import cors from "@fastify/cors";
 import { PrismaClient, Prisma } from './generated/prisma/client.js';

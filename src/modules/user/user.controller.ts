@@ -25,10 +25,10 @@ export async function getUserLogged(
 }
 
 export async function updateUser(
-    req: FastifyRequest<{Body: UpdateUserProfile}>,
+    req: FastifyRequest,
     reply: FastifyReply
 ){
-    const { email, username, password } = req.body;
+    const { email, username, password } = req.body as UpdateUserProfile;
 
     const data: {email?: string; username?: string; password?: string} = {};
     if (email) data.email = email;

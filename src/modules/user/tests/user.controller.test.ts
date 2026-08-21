@@ -27,9 +27,9 @@ describe('Test /api/users/update-profile with invalid pwd format', () => {
         expect(res.success).toBe(true);
     });
 
-    it('should accept an empty object since all fields are optional', () => {
+    it('should reject an empty object since nothing would be updated', () => {
         const res = updateUserSchema.safeParse({})
-        expect(res.success).toBe(true);
+        expect(res.success).toBe(false);
     });
     
 });

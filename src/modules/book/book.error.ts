@@ -1,4 +1,4 @@
-import { ApiError, NotFoundError } from "../../errors/ApiError";
+import { ApiError, NotFoundError, ConflictError, BadRequestError } from "../../errors/ApiError";
 
 export class BookNotFoundError extends NotFoundError {
     constructor(){
@@ -15,5 +15,19 @@ export class BookFetchError extends ApiError {
 export class BookCreateError extends ApiError {
   constructor(message = 'Erreur lors de la création du livre') {
     super(500, message, 'BOOK_CREATE_ERROR');
+  }
+}
+
+export class BookAlreadyExistsError extends ConflictError {
+  constructor() {
+    super('Ce livre a déjà été proposé.');
+    this.code = 'BOOK_ALREADY_EXISTS';
+  }
+}
+
+export class InvalidBookReferenceError extends BadRequestError {
+  constructor() {
+    super('Genre ou thème inconnu.');
+    this.code = 'INVALID_BOOK_REFERENCE';
   }
 }

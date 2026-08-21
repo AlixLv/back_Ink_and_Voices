@@ -50,23 +50,28 @@ app.setSerializerCompiler(serializerCompiler)
 
 // identification du frontend pour accepter ses requêtes côté backend
 await app.register(cors, {
-    origin: 'http://localhost:5177',
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    origin: process.env.CORS_ORIGIN ?? 'http://localhost:5177',
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     credentials: true //pour que backend accepte bien le cookie contenant l'access_token du front
   });
 
+const jwtSecret = process.env.JWT_SECRET;
+if (process.env.NODE_ENV === 'production' && !jwtSecret) {
+  throw new Error('JWT_SECRET must be set in production');
+}
+
 // JWT
 await app.register(fastifyJwt, {
-  secret: process.env.JWT_SECRET || 'your-secret-key',
+  secret: jwtSecret ?? 'dev-only-secret',
   cookie: {
     cookieName: 'access_token',
     signed:false
   }
 });
 
-// plugin Cookie 
+// plugin Cookie
 await app.register(fCookie, {
-  secret: process.env.COOKIE_SECRET_KEY ?? 'your-secret-key',
+  secret: process.env.COOKIE_SECRET_KEY ?? jwtSecret ?? 'dev-only-secret',
   hook: 'preHandler',
 })
 
@@ -83,6 +88,18 @@ app.decorate('authenticate', async function(
   }
 })
 
+app.decorate('isAdmin', async function(
+  req: FastifyRequest,
+  reply: FastifyReply) {
+    const user = await app.prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: { role: true }
+    });
+    if (!user || user.role !== 'admin') {
+      reply.code(403).send({ error: 'FORBIDDEN', message: 'Accès réservé aux administrateurices' });
+    }
+})
+
 app.setErrorHandler((error, request, reply) => {
   request.log.error(error);
 
@@ -91,6 +108,13 @@ app.setErrorHandler((error, request, reply) => {
       // sérialisation de l'objet JS en texte JSON
       error: error.code ?? error.name,
       message: error.message,
+    });
+  }
+
+  if(typeof error === 'object' && error !== null && 'validation' in error && error.validation){
+    return reply.status(400).send({
+      error: 'DATA_VALIDATION_ERROR',
+      message: error instanceof Error ? error.message : 'Invalid request data',
     });
   }
 

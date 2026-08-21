@@ -59,3 +59,18 @@ export const createBookSchema = z.object({
 export type CreateBookInput = z.infer<typeof createBookSchema>;
 
 export const createBookResponseSchema = bookDetailSchema;
+
+export const pendingBooksResponseSchema = z.array(bookDetailSchema);
+
+export const validateBookSchema = z.object({
+  status: z.enum(['validated', 'refused']),
+  comment: z.string().nullable().default(null),
+});
+
+export type ValidateBookInput = z.infer<typeof validateBookSchema>;
+
+export const validateBookResponseSchema = z.object({
+  id: z.number(),
+  status: z.enum(['validated', 'refused']),
+  comment: z.string().nullable(),
+});

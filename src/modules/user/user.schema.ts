@@ -1,11 +1,13 @@
 import {z} from 'zod';
 
-// data/input du user 
 export const updateUserSchema = z.object({
-    email: z.string(),
-    username: z.string(),
-    password: z.string().min(8),
-})
+    email: z.email().optional(),
+    username: z.string().min(1).optional(),
+    password: z.string().min(8).optional(),
+}).refine(
+    (data) => data.email !== undefined || data.username !== undefined || data.password !== undefined,
+    { message: 'Au moins un champ doit être fourni.' }
+)
 
 export type UpdateUserProfile = z.infer<typeof updateUserSchema>
 
@@ -15,4 +17,11 @@ export const userProfileResponseSchema = z.object({
     id: z.string(),
     email: z.email(),
     username: z.string(),
+    role: z.enum(['user', 'admin']),
+})
+
+export const updateUserResponseSchema = z.object({
+    email: z.email(),
+    username: z.string(),
+    requiresLogin: z.boolean(),
 })

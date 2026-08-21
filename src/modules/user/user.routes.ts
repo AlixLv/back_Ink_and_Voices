@@ -1,10 +1,9 @@
 import type { FastifyInstance } from "fastify";
-import { z } from 'zod';
 import {type ZodTypeProvider } from 'fastify-type-provider-zod';
 
 import {updateUser, getUserLogged} from './user.controller.js';
 
-import { updateUserSchema, userProfileResponseSchema } from "./user.schema.js";
+import { updateUserSchema, userProfileResponseSchema, updateUserResponseSchema } from "./user.schema.js";
 
 
 export async function userRoutes(app: FastifyInstance){
@@ -28,13 +27,14 @@ export async function userRoutes(app: FastifyInstance){
 
     }, getUserLogged)
 
-    server.post('/update-profile', {
+    server.put('/update-profile', {
+        preHandler: [app.authenticate],
         schema: {
             description: 'update profile endpoint',
             tags: ['user'],
             body: updateUserSchema,
-            response: { 
-                201: userProfileResponseSchema.describe('Successful updated profile response'),
+            response: {
+                200: updateUserResponseSchema.describe('Successful updated profile response'),
             }
         }
 

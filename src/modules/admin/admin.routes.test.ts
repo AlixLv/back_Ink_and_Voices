@@ -23,12 +23,12 @@ async function loginAndGetToken(email: string, password: string) {
     return rawCookie.split(';')[0]?.split('=').slice(1).join('=')
 }
 
-// test accès à la route protégée GET /api/admin/books/pending sans cookie
-describe('Test GET /api/admin/books/pending unauthorized access', () => {
+// test accès à la route protégée GET /api/admin/books?status=pending sans cookie
+describe('Test GET /api/admin/books unauthorized access', () => {
     it('should return error 401 without cookie', async () => {
         const response = await app.inject({
             method: 'GET',
-            url: 'api/admin/books/pending',
+            url: 'api/admin/books?status=pending',
             headers: { cookie: 'access_token=' },
         })
         const body = response.json();
@@ -38,7 +38,7 @@ describe('Test GET /api/admin/books/pending unauthorized access', () => {
 })
 
 // test accès refusé pour un utilisateurice connecté·e mais non admin
-describe('Test GET /api/admin/books/pending forbidden for non-admin', () => {
+describe('Test GET /api/admin/books forbidden for non-admin', () => {
     afterEach(async () => {
         await prisma.user.deleteMany({ where: { email: 'admintest@example.com' } })
     })
@@ -58,7 +58,7 @@ describe('Test GET /api/admin/books/pending forbidden for non-admin', () => {
 
         const response = await app.inject({
             method: 'GET',
-            url: 'api/admin/books/pending',
+            url: 'api/admin/books?status=pending',
             headers: { cookie: 'access_token=' + token },
         })
         const body = response.json();
@@ -68,7 +68,7 @@ describe('Test GET /api/admin/books/pending forbidden for non-admin', () => {
 })
 
 // test accès autorisé pour un compte admin
-describe('Test GET /api/admin/books/pending allowed for admin', () => {
+describe('Test GET /api/admin/books allowed for admin', () => {
     afterEach(async () => {
         await prisma.user.deleteMany({ where: { email: 'admintest2@example.com' } })
     })
@@ -93,7 +93,7 @@ describe('Test GET /api/admin/books/pending allowed for admin', () => {
 
         const response = await app.inject({
             method: 'GET',
-            url: 'api/admin/books/pending',
+            url: 'api/admin/books?status=pending',
             headers: { cookie: 'access_token=' + token },
         })
         expect(response.statusCode).toBe(200);

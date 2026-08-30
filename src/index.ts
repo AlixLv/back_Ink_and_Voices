@@ -119,6 +119,17 @@ app.setErrorHandler((error, request, reply) => {
     });
   }
 
+  // Erreurs de validation générées par Fastify lui-même (params/querystring/
+  // body qui ne matchent pas le schéma) : ont déjà error.statusCode = 400,
+  // mais rien avant ce point ne le lisait, donc ça retombait sur le 500
+  // générique plus bas malgré une requête invalide côté client, pas serveur.
+  if(error instanceof Error && 'code' in error && error.code === 'FST_ERR_VALIDATION'){
+    return reply.status(400).send({
+      error: 'VALIDATION_ERROR',
+      message: error.message,
+    });
+  }
+
   if(error instanceof Prisma.PrismaClientKnownRequestError){
     return reply.status(500).send({
       error: 'DATABASE_ERROR',

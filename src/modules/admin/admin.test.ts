@@ -1,18 +1,18 @@
 import { expect, expectTypeOf, describe, it, vi, beforeEach } from 'vitest';
-import { getPendingBooksHandler, validateBookHandler } from './admin.controller';
-import { pendingBookSchema, validateBookResponseSchema } from './admin.schema';
+import { getBooksByStatusHandler, validateBookHandler } from './admin.controller';
+import { adminBookSchema, validateBookResponseSchema } from './admin.schema';
 import { BookNotFoundError } from '../book/book.error';
 
 describe('admin types', () => {
-  it('getPendingBooksHandler is a function', () => {
-    expectTypeOf(getPendingBooksHandler).toBeFunction()
+  it('getBooksByStatusHandler is a function', () => {
+    expectTypeOf(getBooksByStatusHandler).toBeFunction()
   })
   it('validateBookHandler is a function', () => {
     expectTypeOf(validateBookHandler).toBeFunction()
   })
 })
 
-describe('getPendingBooksHandler', () => {
+describe('getBooksByStatusHandler', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
@@ -37,6 +37,7 @@ describe('getPendingBooksHandler', () => {
   const mockFindMany = vi.fn().mockResolvedValue(mockPendingBooks)
 
   const mockReq = {
+    query: { status: 'pending' },
     server: {
       prisma: {
         book: {
@@ -51,8 +52,8 @@ describe('getPendingBooksHandler', () => {
     send: vi.fn().mockReturnThis(),
   } as any
 
-  it('returns 200 with formatted pending books including the submitter', async () => {
-    await getPendingBooksHandler(mockReq, mockReply)
+  it('returns 200 with formatted books including the submitter', async () => {
+    await getBooksByStatusHandler(mockReq, mockReply)
 
     expect(mockReply.code).toHaveBeenCalledWith(200)
     expect(mockReply.send).toHaveBeenCalledWith([
@@ -64,8 +65,8 @@ describe('getPendingBooksHandler', () => {
     ])
   })
 
-  it('queries only pending books ordered by created_at asc', async () => {
-    await getPendingBooksHandler(mockReq, mockReply)
+  it('queries books filtered by the requested status, ordered by created_at asc', async () => {
+    await getBooksByStatusHandler(mockReq, mockReply)
 
     expect(mockFindMany).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -75,10 +76,10 @@ describe('getPendingBooksHandler', () => {
     )
   })
 
-  it('validates against pendingBookSchema', async () => {
-    await getPendingBooksHandler(mockReq, mockReply)
+  it('validates against adminBookSchema', async () => {
+    await getBooksByStatusHandler(mockReq, mockReply)
     const sentPayload = mockReply.send.mock.calls[0]![0]
-    const result = pendingBookSchema.safeParse(sentPayload[0])
+    const result = adminBookSchema.safeParse(sentPayload[0])
     expect(result.success).toBe(true)
   })
 })

@@ -1,9 +1,9 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { Prisma } from '../../generated/prisma/client.js';
-import type { ValidateBookParams, ValidateBookInput } from './admin.schema.js';
+import type { GetBooksQuery, ValidateBookParams, ValidateBookInput } from './admin.schema.js';
 import { BookNotFoundError } from '../book/book.error.js';
 
-type PendingBookWithRelations = Prisma.bookGetPayload<{
+type AdminBookWithRelations = Prisma.bookGetPayload<{
   include: {
     type: true;
     themes: { include: { theme: true } };
@@ -11,12 +11,14 @@ type PendingBookWithRelations = Prisma.bookGetPayload<{
   };
 }>;
 
-export async function getPendingBooksHandler(
+export async function getBooksByStatusHandler(
   req: FastifyRequest,
   reply: FastifyReply
 ) {
+  const { status } = req.query as GetBooksQuery;
+
   const books = await req.server.prisma.book.findMany({
-    where: { status: 'pending' },
+    where: { status },
     orderBy: { created_at: 'asc' },
     include: {
       type: true,
@@ -25,7 +27,7 @@ export async function getPendingBooksHandler(
     },
   });
 
-  const formatted = books.map((book: PendingBookWithRelations) => ({
+  const formatted = books.map((book: AdminBookWithRelations) => ({
     id: book.id,
     title: book.title,
     author: book.author,

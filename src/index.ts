@@ -7,10 +7,11 @@ import { userRoutes } from './modules/user/user.routes.js';
 import { bookRoutes } from './modules/book/book.route.js';
 import { typeRoutes } from './modules/type/type.routes.js';
 import { themeRoutes } from './modules/theme/theme.routes.js';
+import { adminRoutes } from './modules/admin/admin.routes.js';
 import { jsonSchemaTransform, serializerCompiler, validatorCompiler, type ZodTypeProvider } from 'fastify-type-provider-zod';
 import fastifyJwt from '@fastify/jwt';
 import fCookie from '@fastify/cookie';
-import { ApiError } from './errors/ApiError.js';
+import { ApiError, ForbiddenError } from './errors/ApiError.js';
 import { ZodError } from 'zod';
 import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUi from '@fastify/swagger-ui';
@@ -83,6 +84,23 @@ app.decorate('authenticate', async function(
   }
 })
 
+// À enchaîner après authenticate (a besoin de req.user.id). Relit le rôle en
+// base à chaque requête plutôt que de faire confiance à un rôle embarqué
+// dans le JWT : une rétrogradation prend effet immédiatement, pas seulement
+// à la prochaine connexion.
+app.decorate('requireAdmin', async function(
+  req: FastifyRequest,
+  _reply: FastifyReply) {
+    const user = await req.server.prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: { role: true },
+    });
+
+    if (!user || user.role !== 'admin') {
+      throw new ForbiddenError('Accès réservé aux administrateurices.');
+    }
+})
+
 app.setErrorHandler((error, request, reply) => {
   request.log.error(error);
 
@@ -134,7 +152,8 @@ if (process.env.NODE_ENV !== 'production'){
         { name: 'user', description: 'Users related endpoints'},
         { name: 'book', description: 'Books related endpoints'},
         { name: 'type', description: 'Book types (genres) related endpoints'},
-        { name: 'theme', description: 'Book themes related endpoints'}
+        { name: 'theme', description: 'Book themes related endpoints'},
+        { name: 'admin', description: 'Admin-only endpoints for validating book suggestions'}
       ]
     },
     // Le swagger s'attend à recevoir du JSON schema brut.
@@ -154,6 +173,7 @@ app.register(userRoutes, {prefix: 'api/users'})
 app.register(bookRoutes, { prefix: '/api/books' });
 app.register(typeRoutes, { prefix: '/api/types' });
 app.register(themeRoutes, { prefix: '/api/themes' });
+app.register(adminRoutes, { prefix: '/api/admin' });
 
 // graceful shutdown
 const listeners = ['SIGINT', 'SIGTERM']

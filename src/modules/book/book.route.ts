@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { type ZodTypeProvider } from 'fastify-type-provider-zod';
-import { getRecentBooksHandler, getBookHandler, createBookHandler } from './book.controller.js';
-import { getBooksResponseSchema, singleBookResponseSchema, getBookParamsSchema, createBookSchema, createBookResponseSchema } from './book.schema.js';
+import { getRecentBooksHandler, getBookHandler, createBookHandler, getMyBooksHandler } from './book.controller.js';
+import { getBooksResponseSchema, singleBookResponseSchema, getBookParamsSchema, createBookSchema, createBookResponseSchema, getMyBooksResponseSchema } from './book.schema.js';
 
 export async function bookRoutes(app: FastifyInstance) {
   const server = app.withTypeProvider<ZodTypeProvider>();
@@ -15,6 +15,22 @@ export async function bookRoutes(app: FastifyInstance) {
       },
     },
   }, getRecentBooksHandler);
+
+  // Route statique "/mine" avant "/:id" (paramétrique) : Fastify les
+  // distingue correctement quel que soit l'ordre, mais autant garder l'ordre
+  // de lecture logique. "Mes contributions" (page profil) : tous les livres
+  // suggérés par la personne connectée, quel que soit leur statut —
+  // contrairement à GET / qui ne renvoie que les validés.
+  server.get('/mine', {
+    preHandler: [app.authenticate],
+    schema: {
+      description: 'list the logged-in user\'s own book suggestions, any status',
+      tags: ['book'],
+      response: {
+        200: getMyBooksResponseSchema.describe('Default response'),
+      },
+    },
+  }, getMyBooksHandler);
 
   server.get('/:id', {
     schema: {

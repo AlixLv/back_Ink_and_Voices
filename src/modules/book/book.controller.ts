@@ -17,6 +17,13 @@ type BookWithRelations = Prisma.bookGetPayload<{
   };
 }>;
 
+type MyBookWithRelations = Prisma.bookGetPayload<{
+  include: {
+    type: true;
+    themes: { include: { theme: true } };
+  };
+}>;
+
 export async function getRecentBooksHandler(
   req: FastifyRequest,
   reply: FastifyReply
@@ -104,6 +111,37 @@ export async function getBookHandler(
       themes: book.themes.map((t: { theme: {id: number; theme_name: string}}) => t.theme),
     };
     return reply.code(200).send(result);
+}
+
+export async function getMyBooksHandler(
+  req: FastifyRequest,
+  reply: FastifyReply
+) {
+  const books = await req.server.prisma.book.findMany({
+    where: { user_id: req.user.id },
+    orderBy: { created_at: 'desc' },
+    include: {
+      type: true,
+      themes: { include: { theme: true } },
+    },
+  });
+
+  const formatted = books.map((book: MyBookWithRelations) => ({
+    id: book.id,
+    title: book.title,
+    author: book.author,
+    short_description: book.short_description,
+    publishing_house: book.publishing_house,
+    publication_year: book.publication_year,
+    resume: book.resume,
+    reference_link: book.reference_link,
+    created_at: book.created_at,
+    type: book.type,
+    themes: book.themes.map((t: { theme: { id: number; theme_name: string } }) => t.theme),
+    status: book.status,
+  }));
+
+  return reply.code(200).send(formatted);
 }
 
 export async function createBookHandler(

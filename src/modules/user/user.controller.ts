@@ -15,7 +15,8 @@ export async function getUserLogged(
     return reply.code(200).send({
         id: user.id,
         email: user.email,
-        username: user.username
+        username: user.username,
+        role: user.role
     })
 }
 

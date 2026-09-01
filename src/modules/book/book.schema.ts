@@ -59,3 +59,13 @@ export const createBookSchema = z.object({
 export type CreateBookInput = z.infer<typeof createBookSchema>;
 
 export const createBookResponseSchema = bookDetailSchema;
+
+// "Mes contributions" (page profil) : les suggestions de l'utilisateurice
+// connecté·e, quel que soit leur statut (contrairement à GET /books qui ne
+// renvoie que les validés). status inclus pour que le front affiche
+// "en attente"/"validé"/"refusé" plutôt qu'un badge fixe.
+export const myBookSchema = bookDetailSchema.extend({
+  status: z.enum(['pending', 'validated', 'refused']),
+});
+
+export const getMyBooksResponseSchema = z.array(myBookSchema);

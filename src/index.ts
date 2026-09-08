@@ -7,10 +7,11 @@ import { userRoutes } from './modules/user/user.routes.js';
 import { bookRoutes } from './modules/book/book.route.js';
 import { typeRoutes } from './modules/type/type.routes.js';
 import { themeRoutes } from './modules/theme/theme.routes.js';
+import { adminRoutes } from './modules/admin/admin.routes.js';
 import { jsonSchemaTransform, serializerCompiler, validatorCompiler, type ZodTypeProvider } from 'fastify-type-provider-zod';
 import fastifyJwt from '@fastify/jwt';
 import fCookie from '@fastify/cookie';
-import { ApiError } from './errors/ApiError.js';
+import { ApiError, ForbiddenError, UnauthorizedError } from './errors/ApiError.js';
 import { ZodError } from 'zod';
 import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUi from '@fastify/swagger-ui';
@@ -71,16 +72,29 @@ await app.register(fCookie, {
 })
 
 // Déclaration de authenticate, qui sera utilisé sur les routes protégées
-app.decorate('authenticate', async function(
-  req: FastifyRequest,
-  reply: FastifyReply) {
-    try {
-        await req.jwtVerify({ onlyCookie: true })
-        console.log('✅ Token vérifié avec succès')
-    } catch (err){
-        console.log('❌ Erreur JWT:', err);
-        reply.code(401).send({message: "Token invalide ou absent"})
+app.decorate('authenticate', async function(req: FastifyRequest){
+  try {
+    await req.jwtVerify({ onlyCookie: true });
+  } catch {
+    throw new UnauthorizedError('Token invalide ou absent');
   }
+})
+
+// À enchaîner après authenticate (a besoin de req.user.id). Relit le rôle en
+// base à chaque requête plutôt que de faire confiance à un rôle embarqué
+// dans le JWT : une rétrogradation prend effet immédiatement, pas seulement
+// à la prochaine connexion.
+app.decorate('requireAdmin', async function(
+  req: FastifyRequest,
+  _reply: FastifyReply) {
+    const user = await req.server.prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: { role: true },
+    });
+
+    if (!user || user.role !== 'admin') {
+      throw new ForbiddenError('Accès réservé aux administrateurices.');
+    }
 })
 
 app.setErrorHandler((error, request, reply) => {
@@ -98,6 +112,17 @@ app.setErrorHandler((error, request, reply) => {
     return reply.status(400).send({
       error: 'DATA_VALIDATION_ERROR',
       message: error.issues.map((i) => i.message).join(','),
+    });
+  }
+
+  // Erreurs de validation générées par Fastify lui-même (params/querystring/
+  // body qui ne matchent pas le schéma) : ont déjà error.statusCode = 400,
+  // mais rien avant ce point ne le lisait, donc ça retombait sur le 500
+  // générique plus bas malgré une requête invalide côté client, pas serveur.
+  if(error instanceof Error && 'code' in error && error.code === 'FST_ERR_VALIDATION'){
+    return reply.status(400).send({
+      error: 'VALIDATION_ERROR',
+      message: error.message,
     });
   }
 
@@ -134,7 +159,8 @@ if (process.env.NODE_ENV !== 'production'){
         { name: 'user', description: 'Users related endpoints'},
         { name: 'book', description: 'Books related endpoints'},
         { name: 'type', description: 'Book types (genres) related endpoints'},
-        { name: 'theme', description: 'Book themes related endpoints'}
+        { name: 'theme', description: 'Book themes related endpoints'},
+        { name: 'admin', description: 'Admin-only endpoints for validating book suggestions'}
       ]
     },
     // Le swagger s'attend à recevoir du JSON schema brut.
@@ -154,6 +180,7 @@ app.register(userRoutes, {prefix: 'api/users'})
 app.register(bookRoutes, { prefix: '/api/books' });
 app.register(typeRoutes, { prefix: '/api/types' });
 app.register(themeRoutes, { prefix: '/api/themes' });
+app.register(adminRoutes, { prefix: '/api/admin' });
 
 // graceful shutdown
 const listeners = ['SIGINT', 'SIGTERM']

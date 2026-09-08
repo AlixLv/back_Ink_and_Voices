@@ -1,6 +1,6 @@
 import { expect, expectTypeOf, describe, it, vi, beforeEach, beforeAll } from 'vitest';
-import { bookSchema, getBooksResponseSchema, bookDetailSchema } from './book.schema';
-import { getRecentBooksHandler, getBookHandler, createBookHandler } from './book.controller';
+import { bookSchema, getBooksResponseSchema, bookDetailSchema, myBookSchema } from './book.schema';
+import { getRecentBooksHandler, getBookHandler, createBookHandler, getMyBooksHandler } from './book.controller';
 import { BookFetchError, BookCreateError } from './book.error';
 import 'dotenv/config';
 import { mock } from 'node:test'
@@ -380,5 +380,77 @@ describe('createBookHandler', () => {
     mockCreate.mockRejectedValueOnce(new Error('DB connection lost'))
 
     await expect(createBookHandler(mockReq, mockReply)).rejects.toThrow(BookCreateError)
+  })
+})
+
+describe('getMyBooksHandler', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  const mockMyBooks = [
+    {
+      id: 11,
+      title: 'Contribution Test Book',
+      author: 'Test Author',
+      short_description: 'desc',
+      reference_link: null,
+      created_at: new Date(),
+      type: { id: 1, type_name: 'Roman', url_image: null },
+      themes: [{ theme: { id: 2, theme_name: 'Féminisme' } }],
+      publishing_house: 'Test House',
+      publication_year: null,
+      resume: null,
+      status: 'pending',
+    },
+  ]
+
+  const mockFindMany = vi.fn().mockResolvedValue(mockMyBooks)
+
+  const mockReq = {
+    user: { id: 'user-uuid' },
+    server: {
+      prisma: {
+        book: {
+          findMany: mockFindMany,
+        },
+      },
+    },
+  } as any
+
+  const mockReply = {
+    code: vi.fn().mockReturnThis(),
+    send: vi.fn().mockReturnThis(),
+  } as any
+
+  it('returns 200 with formatted books including status', async () => {
+    await getMyBooksHandler(mockReq, mockReply)
+
+    expect(mockReply.code).toHaveBeenCalledWith(200)
+    expect(mockReply.send).toHaveBeenCalledWith([
+      expect.objectContaining({
+        id: 11,
+        themes: [{ id: 2, theme_name: 'Féminisme' }],
+        status: 'pending',
+      }),
+    ])
+  })
+
+  it('queries only the logged-in user\'s own books, ordered by created_at desc', async () => {
+    await getMyBooksHandler(mockReq, mockReply)
+
+    expect(mockFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { user_id: 'user-uuid' },
+        orderBy: { created_at: 'desc' },
+      })
+    )
+  })
+
+  it('validates against myBookSchema', async () => {
+    await getMyBooksHandler(mockReq, mockReply)
+    const sentPayload = mockReply.send.mock.calls[0]![0]
+    const result = myBookSchema.safeParse(sentPayload[0])
+    expect(result.success).toBe(true)
   })
 })

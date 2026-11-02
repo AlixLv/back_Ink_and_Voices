@@ -40,7 +40,7 @@
     "fastify": "^5.6.2",
     "fastify-type-provider-zod": "^6.1.0",
     "ts-node": "^10.9.2",
-    "zod": "^4.3.6"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@prisma/adapter-pg": "^7.5.0",
